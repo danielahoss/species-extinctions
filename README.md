@@ -1,7 +1,7 @@
 # Species extinctions
 
 
-Code Authors: Daniela Hoss
+Code Authors: Daniela Hoss, Shane Blowes
 
 
 Daniela Hoss, Shane A. Blowes, Felícia M. Fischer, Tomas Herben, Emma Ladouceur, Valério D. Pillar, Helge Bruelheide, Jonathan M. Chase. Consistent loss of ecosystem functioning following realistic scenarios of biodiversity loss.
