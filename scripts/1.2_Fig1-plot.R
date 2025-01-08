@@ -44,7 +44,7 @@ df_mod <- effects_brm %>%
 
 
 # plot Fig 1 ----------------------------------------------------
-Fig.1 <- ggplot(subset_df, aes(x = mu, y = (reorder(ref, mu)),
+Fig.1 <- ggplot(df_mod, aes(x = mu, y = (reorder(ref, mu)),
                                color = resp_data,
                                shape = resp_data)) +
   
