@@ -1,206 +1,204 @@
-# > mod %>% summary
-# Family: lognormal 
-# Links: mu = identity; sigma = identity 
-# Formula: plot_value_m2 ~ removed_propo + (removed_propo | study_ID/block/time_pad) + (1 | study_ID:block:plot) 
-# Data: df_cover (Number of observations: 7113) 
-# Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
-# total post-warmup draws = 4000
-# 
-# Group-Level Effects: 
-#   ~study_ID (Number of levels: 11) 
-# Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-# sd(Intercept)                    1.94      0.48     1.23     3.11 1.00     1773
-# sd(removed_propo)                0.92      0.37     0.33     1.79 1.00     1512
-# cor(Intercept,removed_propo)     0.17      0.32    -0.48     0.74 1.00     3242
-# Tail_ESS
-# sd(Intercept)                    2617
-# sd(removed_propo)                1597
-# cor(Intercept,removed_propo)     2408
-# 
-# ~study_ID:block (Number of levels: 112) 
-# Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-# sd(Intercept)                    0.05      0.03     0.00     0.12 1.02      340
-# sd(removed_propo)                0.35      0.09     0.18     0.53 1.01      486
-# cor(Intercept,removed_propo)    -0.01      0.49    -0.90     0.93 1.02      205
-# Tail_ESS
-# sd(Intercept)                    1086
-# sd(removed_propo)                 652
-# cor(Intercept,removed_propo)      406
-# 
-# ~study_ID:block:plot (Number of levels: 847) 
-# Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-# sd(Intercept)     0.35      0.01     0.33     0.37 1.00     1503     2228
-# 
-# ~study_ID:block:time_pad (Number of levels: 816) 
-# Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-# sd(Intercept)                    0.14      0.01     0.12     0.17 1.00     2385
-# sd(removed_propo)                0.10      0.03     0.03     0.17 1.02      440
-# cor(Intercept,removed_propo)     0.62      0.26     0.06     0.98 1.01      587
-# Tail_ESS
-# sd(Intercept)                    2784
-# sd(removed_propo)                 642
-# cor(Intercept,removed_propo)     1460
-# 
-# Population-Level Effects: 
-#   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-# Intercept         4.28      0.58     3.14     5.40 1.00      834     1464
-# removed_propo    -1.19      0.39    -1.98    -0.41 1.00     2632     2598
-# 
-# Family Specific Parameters: 
-#   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-# sigma     0.38      0.00     0.38     0.39 1.00     4963     3452
-# 
-# Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
-# and Tail_ESS are effective sample size measures, and Rhat is the potential
-# scale reduction factor on split chains (at convergence, Rhat = 1).
-# Warning message:
-#   There were 1 divergent transitions after warmup. Increasing adapt_delta above 0.8 may help. See http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup 
-# > 
+# Community-level cover 
+# Figures
 
+# 1. Load Libraries and Set Up Environment --------------------------------
 
-# -----------------------------------------------------------
-#  Species-level biomass data model
-# -----------------------------------------------------------
-
-# --- 1. Load Libraries and Set Up Environment ---
 require(tidyverse)
 require(brms)
 library(DHARMa)
 
+# Clear workspace
 rm(list = ls())
-#####data#### 
-#data.R: 
 
+# 2. Load and Preprocess Data ---------------------------------------------
 df_cover <- read.csv(here::here( "data", "df_cover_brm.csv"), header = T) 
 df_cover %>% head
 
+# 3. Model ----------------------------------------------------------------
 
-# model --------------------------------------------------------------------
-(df_cover$plot_value_m2) %>% summary
-as.factor(df_cover$study_ID) %>% summary
-df2 <- df_cover %>% filter(study_ID != "ID_251")
-df3 <- df2 %>% filter(study_ID != "ID_240")
-df3$plot_value_m2 %>% summary
-plot(df2$removed_propo,df2$plot_value_m2)
-mod <- brm(bf(plot_value_m2 ~ removed_propo + (removed_propo | study_ID / block / time_pad) +
-                (1 | study_ID:block:plot)),
-           family = lognormal(),
-          control = list(max_treedepth = 11,
-                         adapt_delta = 0.9),
-           #iter = 5000,# warmup = 2000, 
-           data = df_cover,
-        #   cores = 4, chains = 1,
-          file = "teste3" ) # model_cover_lognorm
+# slope and intercept varying among time_pad within blocks within studies  
+# and plots within blocks within studies
 
-mod <- read_rds(here::here("model_output", "model_cover_lognorm.rds")) 
+# set.seed(2024)
+# mod_cover <- brm(bf(cover ~ removed_propo + (removed_propo | study_ID / block / time_pad) +
+#                       (1 | study_ID:block:plot)),
+#                  family = lognormal(),
+#                  control = list(max_treedepth = 12,
+#                                 adapt_delta = 0.99),
+#                  iter = 7000, warmup = 2000, 
+#                  data = df_cover,
+#                  cores = 4, chains = 4,
+#                  file = "model_cover") 
 
-mod %>% summary
-exp(4.75)
-
-nd <- data.frame(removed_propo = 0 )
-predict(mod, re_formula = NA, newdata = nd)
-# 121 cover
-
-nd <- data.frame(removed_propo = 0.5 )
-predict(mod, re_formula = NA, newdata = nd)
+mod_cover <- read_rds(here::here("model_output", "model_cover.rds")) 
 
 
-# 7500/121
-# 100 - 61.98347
+# 4. Model output and diagnostics -----------------------------------------
 
 
+mod_cover %>% summary
 
-modb <- read_rds(here::here("m_biom_lognorm.rds")) # "mod.rds"
+conditional_effects(mod_cover)
 
-modb %>% summary
-nd <- data.frame(removed_propo = 0 )
-predict(modb, re_formula = NA, newdata = nd)
-213
-
-nd <- data.frame(removed_propo = 0.5 )
-predict(modb, re_formula = NA, newdata = nd)
-122
-
-12200/213
-100 -  57.277
-
-# checking -------------------------------------------------------------
-1 - exp(-1.14*0.5)
-
-4.75-0.96
-
-(exp(-1.14))*0.5
-
-exp(-0.96*0.5+5.32)
-
-sd(df_cover$plot_value_m2)
-mean(df_cover$plot_value_m2)
-
-(187*0.31)/233
-123/234
-mod %>% summary
-
-exp(5.32)
-
-2.611696*0.5
+pp_check(mod_cover)
+pp_check(mod_cover) + scale_x_continuous(trans = "log")
 
 
-(exp(4.75))*0.5
-
-nd <- data.frame(removed_propo = 0.5 )
-predict(modb, re_formula = NA, newdata = nd)
-
-115.5843 - 100
-75.97455 - x
-
-75.97455*100
-
-7597.455/115.5843
-
-100 - 65.73086
-# plot checks -------------------------------------------------------------
+mcmc_plot(mod_cover, type = 'trace')
 
 
-conditional_effects(mod)
-
-
-
-# residuals check ---------------------------------------------------------
-
-mcmc_plot(mod, type = 'trace')
+# examine fit to individual studies
+ pp_check(mod_cover, type = 'scatter_avg_grouped', group = 'study_ID') +
+   geom_abline(intercept = 0, slope = 1, lty = 2)
 
 ggplot() +
   facet_wrap(~study_ID) +
   geom_density(data = df_cover,
-               aes(x = plot_value_m2)) +
+               aes(x = cover)) +
   scale_x_continuous(trans = 'log')
 
 
-# study-level variation in overdispersion for the win :)
-pp_check(mod)
-pp_check(mod) + scale_x_continuous(trans = "log")
-
-# examine fit to individual time series
-pp_check(mod, type = 'scatter_avg_grouped', group = 'study_ID') +
-  # scale_x_continuous(trans = 'log2') +
-  # scale_y_continuous(trans = 'log2') +
-  geom_abline(intercept = 0, slope = 1, lty = 2)
-
-# another look (model fit to central tendency)
-pp_check(mod, type = 'stat_grouped', group = 'study_ID')
+# model fit to central tendency
+pp_check(mod_cover, type = 'stat_grouped', group = 'study_ID')
 
 
 
+# 5. Residual diagnostics using DHARMa ------------------------------------
 
-# plot residuals ------------------------------------------------
+
+model.check <- createDHARMa(
+  simulatedResponse = t(posterior_predict(mod_cover)),
+  observedResponse = df_cover$cover,
+  fittedPredictedResponse = apply(t(posterior_epred(mod_cover)), 1, mean),
+  integerResponse = TRUE)
+
+# plot(model.check)  # qq and residuals
+ 
+# testDispersion(model.check)
+# 
+
+# examine fit to individual studies
+# pp_check(mod_cover, type = 'scatter_avg_grouped', group = 'study_ID') +
+# geom_abline(intercept = 0, slope = 1, lty = 2)
+ 
+
+model_data <- mod_cover$data %>%
+  as_tibble() 
 
 
-# more model inspection
-alpha_q0_ba_dat <- mod$data %>% 
+residuals_model <- model.check$scaledResiduals %>%
+  as_tibble() %>%
+  bind_cols(model_data) %>%
+  rename(resid = value) 
+
+predicted <- predict(mod_cover) %>%
   as_tibble()
 
-# residual check
-resid_alpha_q0_ba<- residuals(mod) %>% 
+# # add predicted values to residual df
+residuals_model <- residuals_model %>%
+  mutate(predicted = predicted$Estimate) %>%
+  as_tibble() %>%
+  inner_join(df_cover %>% 
+               select(-block,
+                      -plot, 
+                      -removed_propo,
+                      -cover, 
+                      -time_pad),
+             by = c("study_ID"),relationship =
+               "many-to-many")
+
+
+
+
+# 6. plot DHARMA residual checks ------------------------------------------
+
+
+boxplot_residuals <- function(data, x, labx = x, laby = "Scaled residuals") {
+  # Get x variable
+  x_var <- as.name(x)
+  
+  # Ensure x is treated as a factor
+  data[[x]] <- as.factor(data[[x]])
+  
+  # Create the plot
+  plot <- ggplot(data, aes(x = !!x_var, y = resid)) +
+    geom_boxplot() +
+    geom_hline(yintercept = 0.25, linetype = "dashed") +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    geom_hline(yintercept = 0.75, linetype = "dashed") +
+    labs(x = labx, y = laby) +
+    theme(
+      text = element_text(size = 8, family = "Helvetica", colour = "black"),
+      panel.background = element_rect(fill = "white"),
+      panel.grid.major = element_blank(),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(colour = "black"),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      axis.line = element_line(colour = "black"),
+      panel.grid.minor = element_blank(),
+      plot.background = element_rect(fill = "white", color = NA)
+    )
+  
+  # Return the plot
+  return(plot)
+}
+
+# pdf("residuals_cover.pdf")  # Open a PDF
+#   par(mfrow=c(3,1))
+
+# plotResiduals(model.check, form = df_cover$study_ID)
+plot1 <- boxplot_residuals(data = residuals_model, x = "study_ID", 
+                           labx = "Studies")
+
+# plotResiduals(model.check, form = df_cover$time_pad)
+plot2 <- boxplot_residuals(data = residuals_model, x = "experiment_duration", 
+                           labx = "Experiment duration") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+
+# plotResiduals(model.check, form = df_cover$removal_method_category)
+plot3 <- boxplot_residuals(data = residuals_model, x = "removal_method_category", 
+                           labx = "Species removal method")
+
+# plotResiduals(model.check, form = df_cover$ppt_pad)
+plot4 <- boxplot_residuals(data = residuals_model, x = "ppt_pad", 
+                           labx = "Mean annual precipitation (mm)") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# plotResiduals(model.check, form = df_cover$temp_pad)
+plot5 <- boxplot_residuals(data = residuals_model, x = "temp_pad", 
+                           labx = "Mean annual temperature (ºC)") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# plotResiduals(model.check, form = df_cover$remov_propo_mean)
+plot6 <- boxplot_residuals(data = residuals_model, x = "remov_propo_mean", 
+                           labx = "Average proportion of species removed") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# plotResiduals(model.check, form = df_cover$n_remov_min)
+plot7 <- boxplot_residuals(data = residuals_model, x = "n_remov_min",
+                           labx = "Minimum number of species removed")+
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# plotResiduals(model.check, form = df_cover$n_remov_max)
+plot8 <- boxplot_residuals(data = residuals_model, x = "n_remov_max", 
+                           labx = "Maximum number of species removed")+
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# plotResiduals(model.check, form = df_cover$n_remov_mean)
+plot9 <- boxplot_residuals(data = residuals_model, x = "n_remov_mean", 
+                           labx = "Average number of species removed")+
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+
+
+# simple way of checking residuals ----------------------------------------
+
+alpha_q0_ba_dat <- mod_cover$data %>% 
+  as_tibble()
+
+
+resid_alpha_q0_ba<- residuals(mod_cover) %>% 
   as_tibble() %>% 
   bind_cols(alpha_q0_ba_dat) %>% 
   rename(resid = Estimate) %>% 
@@ -215,7 +213,7 @@ resid_alpha_q0_ba<- residuals(mod) %>%
                          xmax = max(removed_propo)),
              by = 'study_ID')
 
-alpha_q0_ba_predicted <- predict(mod) %>% 
+alpha_q0_ba_predicted <- predict(mod_cover) %>% 
   as_tibble()
 
 # add predicted values to residual df 
@@ -225,7 +223,7 @@ resid_alpha_q0_ba <- resid_alpha_q0_ba %>%
 resid_alpha_q0_ba_n <- left_join(resid_alpha_q0_ba, 
                                  df_cover, by = c("study_ID", "block",
                                                   "plot", "time_pad", 
-                                                  "plot_value_m2", 
+                                                  "cover", 
                                                   "removed_propo"))
 
 resid <- resid_alpha_q0_ba_n
