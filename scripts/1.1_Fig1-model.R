@@ -1,8 +1,8 @@
-# -----------------------------------------------------------
-# Meta-Analysis Script
-# -----------------------------------------------------------
+# Meta-Analysis 
+# model and model checks
 
-# --- 1. Load Libraries and Set Up Environment ---
+# 1. Load Libraries and Set Up Environment --------------------------------
+
 library(tidyverse)   
 library(gridExtra)
 library(brms)        
@@ -11,7 +11,7 @@ library(DHARMa)
 # Clear workspace 
 rm(list = ls())
 
-# --- 2. Load and Preprocess Data ---
+# 2. Load and Preprocess Data ---------------------------------------------
 
 effects_brm <- read.csv(here::here("data", "effects_brm.csv"), header = TRUE) 
  
@@ -50,8 +50,9 @@ df_pad <- effects_brm %>%
 
 
 
-# --- 3. Model ---
-# 
+# 3. Model ----------------------------------------------------------------
+
+# set.seed(2024)
 # mod_meta <-
 #   brm(data = effects_brm,
 #       yi | se(sei) ~ 1 + (1 | study_ID),
@@ -59,11 +60,18 @@ df_pad <- effects_brm %>%
 #       cores = 4, chains = 4, file = "meta_brm")
 mod_meta <- read_rds(here::here("model_output", "meta_brm.rds"))
 
-# Model output
+# 4. Model output and diagnostics -----------------------------------------
+
 mod_meta %>% summary()
 
-# 4. Model Diagnostics ------------------------------------------
-# Residual diagnostics using DHARMa
+pp_check(mod_meta) # Posterior predictive check
+
+# No divergences to plot
+mcmc_plot(mod_meta, type = 'trace')
+
+
+# 5. Residual diagnostics using DHARMa ------------------------------------
+
 model.check <- createDHARMa(
   simulatedResponse = t(posterior_predict(mod_meta)),
   observedResponse = effects_brm$yi,
@@ -73,16 +81,10 @@ model.check <- createDHARMa(
 
 plot(model.check)  # qq and residuals
 
-pp_check(mod_meta, ndraws = 100)  # Posterior predictive check
+
 
 testDispersion(model.check)
 
-# No divergences to plot
-mcmc_plot(mod_meta, type = 'trace')
-
-# examine fit to individual studies
-pp_check(mod_meta, type = 'scatter_avg_grouped', group = 'study_ID') +
-  geom_abline(intercept = 0, slope = 1, lty = 2)
 
 
 model_data <- mod_meta$data %>%
@@ -97,7 +99,7 @@ predicted <- predict(mod_meta) %>%
   as_tibble()
 
 
-# # add predicted values to residual df
+# add predicted values to residual df
 residuals_model <- residuals_model %>%
   mutate(predicted = predicted$Estimate) %>%
   as_tibble() %>%
@@ -106,10 +108,8 @@ residuals_model <- residuals_model %>%
                "many-to-many")
 
 
-# new plot with function ----------------------------------------
 
-# plot DHARMA residual checks -----------------------------------
-
+# 6. plot DHARMA residual checks ------------------------------------------
 
 boxplot_residuals <- function(data, x, laby = "Scaled residuals") {
   # Get x variable
@@ -385,8 +385,4 @@ plots4to6 <- grid.arrange(plot4, plot5, plot6, nrow = 3)
 
 plots7to10 <- grid.arrange(plot7, plot8, plot9, plot10, nrow = 2)
 # ggsave("Fig1_extended_Data_residuals3.pdf", plots7to10, path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
-
-
-
-
 
