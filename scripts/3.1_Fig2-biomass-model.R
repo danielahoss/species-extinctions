@@ -1,8 +1,8 @@
-# -----------------------------------------------------------
-# Community-level biomass model
-# -----------------------------------------------------------
+# Community-level biomass 
+# model and model checks
 
-# --- 1. Load Libraries and Set Up Environment ---
+# 1. Load Libraries and Set Up Environment --------------------------------
+
 library(tidyverse)   
 library(gridExtra)
 library(brms)        
@@ -11,63 +11,78 @@ library(DHARMa)
 # Clear workspace 
 rm(list = ls())
 
-# --- 2. Load and Preprocess Data ---
+# 2. Load and Preprocess Data ---------------------------------------------
+
 df_biom<- read.csv(here::here("data", "df_biom_brm.csv"), header = T) 
 
-# --- 3. Model ---
+# 3. Model ----------------------------------------------------------------
+
 # slope and intercept varying among time_pad within blocks within studies  
 # and plots within blocks within studies
 
+
 # set.seed(2024)
-# mod_biom <- brm(bf(biomass ~ removed_propo +
-#                 (removed_propo | study_ID / block / time_pad) +
-#                 (1 | study_ID:block:plot)),
-#            data = df_biom, family = lognormal(),
-#            iter = 4000, warmup = 1000,
-#            control = list(max_treedepth = 12,
-#                           adapt_delta = 0.99),
-#            cores = 4, file = "model_biomass2")
+# mod_biom <- brm(
+#   bf(biomass ~ removed_propo +
+#        (removed_propo | study_ID / block / time_pad) +
+#       (1 | study_ID:block:plot)),
+#   data = df_biom, family = lognormal(),
+#   iter = 4000, warmup = 1000,
+#   control = list(max_treedepth = 12,
+#                  adapt_delta = 0.99),
+#   cores = 4, file = "model_biomass")
 
 
-# saveRDS(mod_biom, here::here("model_output",  "model_biomass.rds"))
 mod_biom <- read_rds(here::here("model_output", "model_biomass.rds")) 
 
-# Model output
+
+# 4. Model output and diagnostics -----------------------------------------
+
+
 mod_biom %>% summary()
 
-# 4. Model Diagnostics ------------------------------------------
-# Residual diagnostics using DHARMa
+
+conditional_effects(mod_biom)
+
+
+pp_check(mod_biom) + scale_x_continuous(trans = "log") # Posterior predictive check
+
+
+# No divergences to plot
+mcmc_plot(mod_biom, type = 'trace')
+
+# examine fit to individual studies
+# pp_check(mod_biom, type = 'scatter_avg_grouped', group = 'study_ID') +
+#   geom_abline(intercept = 0, slope = 1, lty = 2)
+
+
+
+# 5. Residual diagnostics using DHARMa ------------------------------------
 model.check <- createDHARMa(
   simulatedResponse = t(posterior_predict(mod_biom)),
   observedResponse = df_biom$biomass,
   fittedPredictedResponse = apply(t(posterior_epred(mod_biom)), 1, mean),
   integerResponse = TRUE)
 
+
 # plot(model.check)  # qq and residuals
-# 
-# pp_check(mod_biom, ndraws = 100)  # Posterior predictive check
-# 
 # testDispersion(model.check)
-# 
-# # No divergences to plot
-# mcmc_plot(mod_biom, type = 'trace')
-# 
-# # examine fit to individual studies
-# pp_check(mod_biom, type = 'scatter_avg_grouped', group = 'study_ID') +
-#   geom_abline(intercept = 0, slope = 1, lty = 2)
-# 
+
 
 model_data <- mod_biom$data %>%
   as_tibble() 
-  
+
+
 
 residuals_model <- model.check$scaledResiduals %>%
   as_tibble() %>%
   bind_cols(model_data) %>%
   rename(resid = value) 
 
+
 predicted <- predict(mod_biom) %>%
   as_tibble()
+
 
 # # add predicted values to residual df
 residuals_model <- residuals_model %>%
@@ -85,7 +100,15 @@ residuals_model <- residuals_model %>%
 
 
 
-# plot DHARMA residual checks -----------------------------------
+
+
+# 6. plot DHARMA residual checks ------------------------------------------
+
+
+
+
+
+
 
 
 boxplot_residuals <- function(data, x, labx = x, laby = "Scaled residuals") {
@@ -118,56 +141,78 @@ boxplot_residuals <- function(data, x, labx = x, laby = "Scaled residuals") {
   return(plot)
 }
 
+
 # pdf("residuals_biomass.pdf")  # Open a PDF
 #   par(mfrow=c(3,1))
+
 
 # EDIT THE LABS X -----------------------------------------------
 
 
 
-# plotResiduals(model.check, form = df_biom$study_ID)
+
+
+
+# plotResiduals(model.check, form = df_biom$study_ID) 
+# almost all studies deviate from uniformity
+# within group deviations from uniformity
 plot1 <- boxplot_residuals(data = residuals_model, x = "study_ID", 
-                  labx = "Studies")
+                           labx = "Studies")
+
 
 # plotResiduals(model.check, form = df_biom$time_pad)
+# quantiles deviations detected
 plot2 <- boxplot_residuals(data = residuals_model, x = "experiment_duration", 
-                  labx = "Experiment duration") +
+                           labx = "Experiment duration") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+
 
 
 # plotResiduals(model.check, form = df_biom$removal_method_category)
+# within group deviations from uniformity
 plot3 <- boxplot_residuals(data = residuals_model, x = "removal_method_category", 
-                  labx = "Species removal method")
+                           labx = "Species removal method")
+
 
 # plotResiduals(model.check, form = df_biom$ppt_pad)
+# within group deviations from uniformity
 plot4 <- boxplot_residuals(data = residuals_model, x = "ppt_pad", 
-                  labx = "Mean annual precipitation (mm)") +
+                           labx = "Mean annual precipitation (mm)") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
 
 # plotResiduals(model.check, form = df_biom$temp_pad)
 plot5 <- boxplot_residuals(data = residuals_model, x = "temp_pad", 
-                  labx = "Mean annual temperature (ºC)") +
+                           labx = "Mean annual temperature (ºC)") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
 
 # plotResiduals(model.check, form = df_biom$remov_propo_mean)
 plot6 <- boxplot_residuals(data = residuals_model, x = "remov_propo_mean", 
-                  labx = "Average proportion of species removed") +
+                           labx = "Average proportion of species removed") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
 
 # plotResiduals(model.check, form = df_biom$n_remov_min)
 plot7 <- boxplot_residuals(data = residuals_model, x = "n_remov_min",
-                  labx = "Minimum number of species removed")+
+                           labx = "Minimum number of species removed")+
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
 
 # plotResiduals(model.check, form = df_biom$n_remov_max)
 plot8 <- boxplot_residuals(data = residuals_model, x = "n_remov_max", 
-                  labx = "Maximum number of species removed")+
+                           labx = "Maximum number of species removed")+
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
 
 # plotResiduals(model.check, form = df_biom$n_remov_mean)
 plot9 <- boxplot_residuals(data = residuals_model, x = "n_remov_mean", 
-                  labx = "Average number of species removed")+
+                           labx = "Average number of species removed")+
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+
+
 
 
 
@@ -189,13 +234,21 @@ plot10 <- ggplot(residuals_model, aes(x = (mean_ric_control_pad), y = resid)) +
     plot.background = element_rect(fill = "white", color = NA))
 
 
+
+
 # dev.off()
+
 
 plots1to9 <- grid.arrange(plot6, plot3, plot4,
                           plot1, plot5, plot2,
                           plot7, plot8, plot9, nrow = 3)
-# ggsave("Fig2a_extended_Data_residuals1.pdf", plots1to9, path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
+# ggsave("Fig2a_extended_Data_residuals1.pdf", plots1to9, 
+# path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
 
 
-# ggsave("Fig2a_extended_Data_residuals2.pdf", plot10, path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
+
+
+# ggsave("Fig2a_extended_Data_residuals2.pdf", plot10, 
+# path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
+
 
