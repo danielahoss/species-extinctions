@@ -1,18 +1,19 @@
-# -----------------------------------------------------------
-# Meta-Analysis Moderators
-# -----------------------------------------------------------
+# Meta-Analysis Moderators 
+# model and model checks
 
-# --- 1. Load Libraries and Set Up Environment ---
+
+# 1. Load Libraries and Set Up Environment --------------------------------
+
 library(tidyverse)
 library(brms) 
 library(tidybayes)
 library(ggdist)
-require(viridis)
 
 # Clear workspace 
 rm(list = ls())
 
-# --- 2. Load and Preprocess Data ---
+# 2. Load and Preprocess Data ---------------------------------------------
+
 effects_brm <- read.csv(here::here("data", "effects_brm.csv"), header = T) 
 
 # standardizing variables
@@ -49,7 +50,9 @@ df_pad <- effects_brm %>%
 
 
 
-# Model_mean annual ppt -----------------------------------------
+
+# 3. Model_mean annual ppt ------------------------------------------------
+
 
 # mod_ppt <-
 #   brm(data = moderators_df_pad,
@@ -63,56 +66,8 @@ mod_ppt %>% summary
 pp_check(mod_ppt) 
 
 
-# plot Model_mean annual ppt ------------------------------------
 
-fitted_ppt <- cbind(mod_ppt$data,
-                    fitted(mod_ppt, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-
-fig_moderators_ppt <- ggplot() +
-  geom_point(data = fitted_ppt,
-             aes(x = mean_annual_ppt_mm, y = yi, colour = study_ID),
-             size = 2, alpha = 1) +
-  
-  geom_ribbon(data = fitted_ppt,
-              aes(x = mean_annual_ppt_mm,
-                  ymin = (Q2.5),
-                  ymax = (Q97.5)),
-              alpha = 0.2) +
-  #  fixed effect
-  geom_line(data = fitted_ppt,
-            aes(x = mean_annual_ppt_mm, y = (Estimate)),
-            linewidth = 1,
-            colour = "black") + # coord_cartesian(ylim = c(-1, 1), xlim = c(min(fitted_ppt$mean_annual_ppt_mm), max(fitted_ppt$mean_annual_ppt_mm)))+
-                  
-  labs(x = 'Mean Annual Precipitation (mm)',
-       y = expression(paste('Log Response Ratio'))) +
-  
- scale_colour_viridis_d(option = "plasma")+
-
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        #legend.position = "none",
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white",
-                                       color = NA))
-
-fig_moderators_ppt
-# ggsave("fig_moderators_ppt.pdf", fig_moderators_ppt, path = ("figures/ExtendedData"), 
-#        width = 200, height = 200, units = 'mm')
-
-# Model_mean annual temperature ---------------------------------
+# 4. Model_mean annual temperature ---------------------------------
 
 # mod_temp <-
 #   brm(data = moderators_df_pad,
@@ -126,58 +81,8 @@ mod_temp %>% summary
 mod_temp %>% pp_check
 
 
-# plot Model_mean annual temperature ----------------------------
 
-fitted_temp <- cbind(mod_temp$data,
-                     fitted(mod_temp, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               #filter(!is.na(mean_annual_temperature_Celsius)) %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-fig_moderators_temp <- ggplot() +
-  geom_point(data = fitted_temp,
-             aes(x = mean_annual_temperature_Celsius, y = yi,
-                 colour = study_ID),
-             size = 2, alpha = 1) +
-  
-  geom_ribbon(data = fitted_temp,
-              aes(x = temp_pad,
-                  ymin = (Q2.5),
-                  ymax = (Q97.5)),
-              alpha = 0.2) +
-  #  fixed effect
-  geom_line(data = fitted_temp,
-            aes(x = temp_pad, y = (Estimate)),
-            linewidth = 1,
-            colour = "black") +
-  
-  labs(x = 'Mean Annual Temperature (ºC)',
-       y = expression(paste('Log Response Ratio'))) +
-  
-  scale_colour_viridis_d(option = "plasma") +
-  
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA))
-
-fig_moderators_temp
-# ggsave("fig_moderators_temp.pdf", fig_moderators_temp, path = ("figures/ExtendedData"), 
-#        width = 200, height = 200, units = 'mm')
-
-
-
-
-# Model_time_pad ------------------------------------------------
+# 5. Model_time_pad ------------------------------------------------
 
 # mod_time <-
 #   brm(data = moderators_df_pad,
@@ -192,57 +97,8 @@ mod_time %>% summary
 pp_check(mod_time) 
 
 
-# plot Model_time_pad -------------------------------------------
 
-fitted_time <- cbind(mod_time$data, 
-                     fitted(mod_time, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-fig_moderators_time <- ggplot() +
-  geom_point(data = fitted_time,
-             aes(x = experiment_duration, y = yi,
-                 colour = study_ID),
-             size = 2, alpha = 1) +
-  
-  geom_ribbon(data = fitted_time,
-              aes(x = experiment_duration,
-                  ymin = (Q2.5),
-                  ymax = (Q97.5)),
-              alpha = 0.2) +
-  #  fixed effect
-  geom_line(data = fitted_time,
-            aes(x = experiment_duration, y = (Estimate)),
-            linewidth = 1,
-            colour = "black") +
-  
-  scale_x_continuous(limits = c(.5, 9.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9)) +
- 
-  labs(x = 'Experiment duration',
-       y = 'Log Response Ratio') +
-  
-  scale_colour_viridis_d(option = "plasma") +
-  
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA))
-
-fig_moderators_time
-# ggsave("fig_moderators_time.pdf", fig_moderators_time, path = ("figures/ExtendedData"), 
-#        width = 200, height = 200, units = 'mm')
-
-
-# Model_latitude ------------------------------------------------
+# 6. Model_latitude ------------------------------------------------
 
 
 # mod_lat <-
@@ -260,60 +116,8 @@ conditional_effects(mod_lat)
 
 
 
-# plot Model_latitude -------------------------------------------
 
-
-fitted_lat <- cbind(mod_lat$data, 
-                    fitted(mod_lat, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-
-fig_moderators_lat <- ggplot() +
-  geom_point(data = fitted_lat,
-             aes(x = latitude_abs, y = yi,
-                 colour = study_ID),
-             size = 2, alpha = 1) +
-  
-  geom_ribbon(data = fitted_lat,
-              aes(x = latitude_abs,
-                  ymin = (Q2.5),
-                  ymax = (Q97.5)),
-              alpha = 0.2) +
-  #  fixed effect
-  geom_line(data = fitted_lat,
-            aes(x = latitude_abs, y = (Estimate)),
-            linewidth = 1,
-            colour = "black") +
-  
- coord_cartesian(ylim = c(-1.05, .5)) +
-
-    labs(x = 'Absolute Latitude',
-       y = 'Log Response Ratio') +
-  
-  scale_colour_viridis_d(option = "plasma") +
-  
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA))
-
-fig_moderators_lat
-# ggsave("fig_moderators_lat.pdf", fig_moderators_lat, path = ("figures/ExtendedData"), 
-#        width = 200, height = 200, units = 'mm')
-
-
-
-# Model_response_variable ---------------------------------------
+# 7. Model_response_variable ---------------------------------------
 
 # mod_resp <-
 #   brm(data = moderators_df_pad,
@@ -328,51 +132,8 @@ conditional_effects(mod_resp)
 pp_check(mod_resp) 
 
 
-# plot Model_response_variable ----------------------------------
 
-
-fitted_response_variable <- cbind(mod_resp$data, 
-                                  fitted(mod_resp, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-fig_mod_resp <- ggplot() +
-  geom_boxplot(data = fitted_response_variable,
-               aes(x = response_variable, y = yi)) +
-  
-  labs(x = 'Response variable',
-       y = 'Log Response Ratio') +
-
-    scale_colour_viridis_d(option = "plasma") +
-  
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA)) 
-
-fig_moderators_resp_var <-  
-  fig_mod_resp + geom_jitter(data = fitted_response_variable, 
-                             aes(x = response_variable, y = yi, colour = study_ID), 
-                             width = 0.3,  # Adjust the horizontal jitter
-                             size = 2)    
-
-fig_moderators_resp_var
-# ggsave("fig_moderators_resp_var.pdf", fig_moderators_resp_var, path = ("figures/ExtendedData"), 
-#         width = 200, height = 200, units = 'mm') 
-
-
-
-
-# Model_effect_type ---------------------------------------------
+# 8. Model_effect_type ---------------------------------------------
 
 
 
@@ -390,43 +151,4 @@ conditional_effects(mod_effect_type)
 pp_check(mod_effect_type) 
 
 
-
-# plot Model_effect_type ----------------------------------------
-
-fitted_effect_type <- cbind(mod_effect_type$data,
-                            fitted(mod_effect_type, re_formula = NA, scale = 'linear')) %>% 
-  as_tibble() %>% 
-  inner_join(df_pad %>% 
-               distinct(study_ID, .keep_all = TRUE), 
-             relationship = "many-to-many",
-             by = c('study_ID'))
-
-fig_mod_effect_type <- ggplot() +
-  geom_boxplot(data = fitted_effect_type,
-               aes(x = effect_type, y = yi)) +
-  
-  labs(x = 'Response variable',
-       y = 'Log Response Ratio') +
-  
-  scale_colour_viridis_d(option = "plasma") +
-  
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        axis.title = element_text(colour = "black"),
-        axis.ticks = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white", color = NA))
-
-fig_moderators_effect_type <- fig_mod_effect_type + geom_jitter(data = fitted_effect_type, 
-                 aes(x = effect_type, y = yi, colour = study_ID), 
-                 width = 0.3,  # Adjust the horizontal jitter for plotting visibility
-                 size = 2)     
-
-fig_moderators_effect_type
-# ggsave("fig_moderators_effect_type.pdf", fig_moderators_effect_type, path = ("figures/ExtendedData"), 
-#         width = 200, height = 200, units = 'mm')
 
