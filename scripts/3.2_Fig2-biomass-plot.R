@@ -1,8 +1,8 @@
-# -----------------------------------------------------------
-#  Community-level biomass Figure
-# -----------------------------------------------------------
+# Community-level biomass 
+# Figures
 
-# --- 1. Load Libraries and Set Up Environment ---
+# 1. Load Libraries and Set Up Environment --------------------------------
+
 require(tidyverse)
 require(DHARMa)
 require(brms)
@@ -10,16 +10,14 @@ require(colorspace)
 
 rm(list = ls())
 
-
-#####data#### 
+# 2. Load and Preprocess Data ---------------------------------------------
 
 df_biom <- read.csv(here::here( "data", "df_biom_brm.csv"), header = T) 
 df_biom %>% head
 
 
 
-#
-# load model --------------------------------------------------------------------
+# 3. Upload model and plot figures ----------------------------------------
 
 mod_biom <- read_rds(here::here("model_output", "model_biomass.rds")) 
 mod_biom %>% summary
@@ -29,7 +27,8 @@ mod_biom %>% summary
 biom_fitted <- cbind(mod_biom$data, fitted(mod_biom, re_formula = NA, scale = 'linear')) %>% 
   as_tibble() %>% 
   left_join(df_biom, by = c("study_ID", "block",
-                             "plot", "time_pad", 
+                            # "plot",
+                            "time_pad", 
                              "biomass", 
                              "removed_propo"))
 
@@ -37,8 +36,6 @@ biom_fitted <- cbind(mod_biom$data, fitted(mod_biom, re_formula = NA, scale = 'l
 biom_exp_coef <- coef(mod_biom)
 
 
-# cbind(unlist(colnames(biom_exp_coef2)), unlist(colnames(biom_exp_coef2)) %in% 
-#         unlist(colnames(df_biom)))
 
 biom_exp_coef2 <- bind_cols(biom_exp_coef$study_ID[,,'Intercept'] %>%
                               as_tibble() %>%
@@ -72,46 +69,24 @@ biom_fix <- as.data.frame(fixef(mod_biom))
 
 
 
-cbind(unlist(colnames(biom_fitted)), unlist(colnames(biom_fitted)) %in% 
-        unlist(colnames(biom_exp_coef2)))
-
 biom_fitted <- biom_fitted %>% 
   left_join(biom_exp_coef2, by = c("study_ID"))
 
 
 
 
-# Original color
-original_color <- "#996633"
-
-# Lighten the color
-
-lighter_hex_color <- lighten("#996633", amount = 0.9)
-darker_hex_color <- darken("#996633", amount = 0.4)
-# Display the original and lighter colors
-cat("Original Color: ", darker_hex_color, "\n")
-cat("Lighter Color:  ", lighter_hex_color, "\n")
-
-
-
-# Function to create a green palette with varying number of discrete colors using hexadecimal colors
+# create a brown palette
 create_hex_brown_palette <- function(n) {
   hex_colors <- colorRampPalette(c("#d9bf9d","#3F3326" ))(n)
   return(hex_colors)
 }
 
-
-# Specify the number of colors you want in the palette
 num_colors <- 13
-
-# Create the green palette with hexadecimal colors
 my_hex_brown_palette <- create_hex_brown_palette(num_colors)
 
-# Display the palette
-print(my_hex_brown_palette)
-
-# Plot the palette for visualization
-barplot(rep(1, num_colors), col = my_hex_brown_palette, main = "Hexadecimal Green Palette")
+# Plot the palette
+barplot(rep(1, num_colors),
+        col = my_hex_brown_palette)
 
   
 
@@ -180,8 +155,6 @@ Fig.2a <-
 # ggsave("Fig.2a.pdf",  path = "figures", width = 179, height = 89, units = 'mm')
 
   
-  
-
 
 # show study-level effects
 Fig.2a_study_level_effects  <-
@@ -198,33 +171,41 @@ Fig.2a_study_level_effects  <-
   
 #  fixed effect
 geom_hline(data =  biom_fix,
-           aes(yintercept = Estimate[2]), size = 1.2) +
+           aes(yintercept = Estimate[2]), linewidth = 1.2) +
   
   geom_rect(data = biom_fix,
             aes(xmin = -Inf, xmax = Inf,
                 ymin = Q2.5[2], ymax = Q97.5[2]),
             alpha = 0.2) +
   
-  labs(x = 'study') +
- 
+  labs(x = 'Study', y = "Study-level effects") +
   
   scale_x_discrete(limits = rev(levels(biom_fitted$study_ID))) + 
   
   coord_flip() + 
   
-  theme(legend.background = element_rect(fill = "white"),
-        legend.box.background = element_rect(fill = "white"),
-        panel.background = element_rect(fill = "white"),
-        panel.grid.major = element_blank(),
-       legend.position = "none",
-        axis.text = element_text(colour = "black"),
-        axis.line = element_line(colour = "black"),
-        panel.grid.minor = element_blank(),
-        plot.background = element_rect(fill = "white",
-                                       color = NA))
+  theme(
+    legend.background = element_rect(fill = "white"),
+    legend.box.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_blank(),
+    legend.position = "none",
+    
+    axis.title = element_text(face="bold"),
+    axis.ticks = element_line(colour = "black"),
+    
+    axis.text = element_text(colour = "black"),
+    axis.line = element_line(colour = "black"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "white", color = NA),
+    text = element_text(size = 7, family = "Helvetica"))
 
 Fig.2a_study_level_effects
 
-# ggsave("ExtendedData_Fig.2a_study_level_effects.pdf", path = "figures", width = 90, height = 100, units = 'mm')
+# ggsave("ExtendedData_Fig.2a_study_level_effects.pdf", path = "figures", width = 179, height = 89, units = 'mm')
 
 
+
+library(patchwork)
+Fig.2a + Fig.2a_study_level_effects # + plot_annotation(tag_levels = 'c') 
+# ggsave("Fig.2a_plus_study_level_effects.pdf", path = "figures", width = 190, height = 100, units = 'mm')
