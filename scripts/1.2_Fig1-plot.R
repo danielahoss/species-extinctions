@@ -1,8 +1,8 @@
-# -----------------------------------------------------------
-# Meta-Analysis Script
-# -----------------------------------------------------------
+# Meta-Analysis
+# Figures
 
-# --- 1. Load Libraries and Set Up Environment ---
+# 1. Load Libraries and Set Up Environment --------------------------------
+
 library(tidyverse)   
 library(gridExtra)
 library(brms)        
@@ -12,13 +12,14 @@ library(ggdist)
 # Clear workspace 
 rm(list = ls())
 
-# --- 2. Load and Preprocess Data ---
+# 2. Load and Preprocess Data ---------------------------------------------
+
 
 effects_brm <- read.csv(here::here("data", "effects_brm.csv"), header = TRUE) 
 
+# 3. Upload model and plot figures ----------------------------------------
 mod_meta <- read_rds(here::here("model_output", "meta_brm.rds"))
 
-# Wrangling to Figure 1 -------------------------------------------------------
 df_mod <- effects_brm %>%
   unite("ref", c(author, publ_year), sep = " ", na.rm = TRUE, remove = FALSE) %>%
   group_by(study_ID) %>%
@@ -132,6 +133,6 @@ Fig.1 <- ggplot(df_mod, aes(x = mu, y = (reorder(ref, mu)),
     plot.background = element_rect(fill = "white",
                                    color = NA))
 # save
-# ggsave("Fig1.png", Fig.1, path = "figures", 
-#        width = 200, height = 200, units = 'mm')
+ # ggsave("Fig1.png", Fig.1, path = "figures", 
+ #        width = 200, height = 200, units = 'mm')
 
