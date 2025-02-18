@@ -4,7 +4,7 @@
 # 1. Load Libraries and Set Up Environment --------------------------------
 
 library(tidyverse)   
-library(gridExtra)
+library(patchwork)
 library(brms)        
 library(DHARMa)      
 
@@ -16,6 +16,8 @@ rm(list = ls())
 df_biom<- read.csv(here::here("data", "df_biom_brm.csv"), header = T) 
 
 # 3. Model ----------------------------------------------------------------
+
+
 
 # slope and intercept varying among time_pad within blocks within studies  
 # and plots within blocks within studies
@@ -40,6 +42,8 @@ mod_biom <- read_rds(here::here("model_output", "model_biomass.rds"))
 
 
 mod_biom %>% summary()
+
+
 
 
 conditional_effects(mod_biom)
@@ -150,9 +154,6 @@ boxplot_residuals <- function(data, x, labx = x, laby = "Scaled residuals") {
 
 
 
-
-
-
 # plotResiduals(model.check, form = df_biom$study_ID) 
 # almost all studies deviate from uniformity
 # within group deviations from uniformity
@@ -211,44 +212,21 @@ plot9 <- boxplot_residuals(data = residuals_model, x = "n_remov_mean",
                            labx = "Average number of species removed")+
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
+residuals_model$mean_ric_control_pad <- round(residuals_model$mean_ric_control_pad,0)
+plot10 <- boxplot_residuals(data = residuals_model, x = "mean_ric_control_pad", 
+                           labx = "Average number of species in controls")+
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
 
+plot10
 
+resid <- plot10 +  plot6  +  plot4 + 
+  plot5 +  plot2 + 
+  plot7 +  plot8 +  plot9 + plot1 + plot3 +   plot_annotation(tag_levels = 'a') +
+plot_layout(nrow = 4)
+resid
 
-
-# plotResiduals(model.check, form = df_biom$mean_ric_control_pad)
-plot10 <- ggplot(residuals_model, aes(x = (mean_ric_control_pad), y = resid)) +
-  geom_point() +
-  geom_hline(yintercept = 0.25, linetype = "dashed") +
-  geom_hline(yintercept = 0.5, linetype = "dashed") +
-  geom_hline(yintercept = 0.75, linetype = "dashed") +
-  labs(x = "Mean richness of control (centered)", y = "Scaled residuals") +
-  theme(
-    text = element_text(size = 8, family = "Helvetica", colour = "black"),
-    panel.background = element_rect(fill = "white"),
-    panel.grid.major = element_blank(),
-    axis.title = element_text(face="bold"),
-    axis.text = element_text(colour = "black"),
-    axis.line = element_line(colour = "black"),
-    panel.grid.minor = element_blank(),
-    plot.background = element_rect(fill = "white", color = NA))
-
-
-
-
-# dev.off()
-
-
-plots1to9 <- grid.arrange(plot6, plot3, plot4,
-                          plot1, plot5, plot2,
-                          plot7, plot8, plot9, nrow = 3)
-# ggsave("Fig2a_extended_Data_residuals1.pdf", plots1to9, 
-# path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
-
-
-
-
-# ggsave("Fig2a_extended_Data_residuals2.pdf", plot10, 
-# path = ("figures/ExtendedData"), width = 180, height = 170, units = 'mm')
+ # ggsave("Fig2a_extended_Data_residuals.pdf", resid,
+ #        path = ("figures"), width = 200, height = 200, units = 'mm')
 
 
