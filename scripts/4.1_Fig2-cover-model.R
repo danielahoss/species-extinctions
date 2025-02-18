@@ -6,6 +6,7 @@
 require(tidyverse)
 require(brms)
 library(DHARMa)
+require(patchwork)
 
 # Clear workspace
 rm(list = ls())
@@ -191,6 +192,16 @@ plot9 <- boxplot_residuals(data = residuals_model, x = "n_remov_mean",
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
 
+
+resid2cd <- # plot10 + 
+  plot6  +  plot4 + 
+  plot5 +  plot2 + 
+  plot7 +  plot8 +  plot9 + plot1 + plot3 +   plot_annotation(tag_levels = 'a') +
+  plot_layout(nrow = 4)
+resid2cd
+
+ggsave("Fig2b_extended_Data_residuals.pdf", resid2cd,
+       path = ("figures"), width = 200, height = 200, units = 'mm')
 
 # simple way of checking residuals ----------------------------------------
 
