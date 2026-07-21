@@ -124,7 +124,7 @@ ft <- flextable(fe_rows) %>%
   hline_bottom(part = "body",   border = fp_border(width = 1)) %>%
 
   set_caption(paste(
-    "Supplementary Table. Removal treatment model comparison.",
+    "Supplementary Table S6. Removal treatment model comparison.",
     "Three models are compared using leave-one-out cross-validation (LOO-ELPD).",
     "ELPD diff and SE diff are relative to the best-fitting model (Model 3).",
     "Estimates are posterior means with posterior standard deviation (Posterior SD)",
@@ -136,10 +136,10 @@ ft
 # 6. Save to Word -------------------------------------------------------------
 
 doc <- read_docx() %>%
-  body_add_par("Supplementary Table — Removal treatment model comparison",
+  body_add_par("Supplementary Table S6: Removal treatment model comparison",
                style = "heading 1") %>%
   body_add_flextable(ft)
 
-print(doc, target = here::here("SupplementaryTable_model_comparison.docx"))
+print(doc, target = here::here("SupplementaryTable_S6_model_comparison.docx"))
 
-message("Saved: SupplementaryTable_model_comparison.docx")
+message("Saved: SupplementaryTable_S6_model_comparison.docx")

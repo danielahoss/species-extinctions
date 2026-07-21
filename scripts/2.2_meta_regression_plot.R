@@ -61,7 +61,7 @@ theme_mods <- theme(
   plot.background       = element_rect(fill = "white", color = NA)
 )
 
-# Supplementary Fig. 2 — Mean annual precipitation -----------------------
+# Supplementary Fig. 3 — Mean annual precipitation -----------------------
 
 mod_ppt <- read_rds(here::here("model_output", "ma_moderators_ppt.rds"))
 
@@ -92,18 +92,19 @@ fig_moderators_ppt <- ggplot() +
   geom_point(data = fitted_ppt,
              aes(x = mean_annual_ppt_mm, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
+  coord_cartesian(ylim = c(-1, 1)) +
   labs(x = "Mean Annual Precipitation (mm)", y = "Log Response Ratio") +
   scale_colour_viridis_d(option = "plasma") +
   theme_mods
 
 fig_moderators_ppt
-ggsave("Extended Data Fig. 2 - mean annual precipitation.pdf", 
+ggsave("SupplementaryFigure_03_precipitation.pdf", 
        fig_moderators_ppt,
-       path = here::here("figures", "ExtendedData"), 
+       path = here::here("figures"), 
        width = 200, height = 200, units = "mm", device = cairo_pdf)
 
 
-# Supplementary Fig. 3 — Mean annual temperature -------------------------
+# Supplementary Fig. 2 — Mean annual temperature -------------------------
 
 mod_temp <- read_rds(here::here("model_output", "ma_moderators_temp.rds"))
 mod_temp %>% summary
@@ -143,14 +144,15 @@ fig_moderators_temp <- ggplot() +
   geom_point(data = fitted_temp,
              aes(x = mean_annual_temperature_Celsius, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
+  coord_cartesian(ylim = c(-1, 1)) +
   labs(x = "Mean Annual Temperature (\u00b0C)", y = "Log Response Ratio") +
   scale_colour_viridis_d(option = "plasma") +
   theme_mods
 
 fig_moderators_temp
-ggsave("Extended Data Fig. 3 - mean annual temperature.pdf",
+ggsave("SupplementaryFigure_02_temperature.pdf",
        fig_moderators_temp,
-       path = here::here("figures", "ExtendedData"), 
+       path = here::here("figures"), 
        width = 200, height = 200, units = "mm", device = cairo_pdf)
 
 
@@ -185,14 +187,14 @@ fig_moderators_lat <- ggplot() +
   geom_point(data = fitted_lat,
              aes(x = latitude_abs, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
-  coord_cartesian(ylim = c(-1.05, .5)) +
+  coord_cartesian(ylim = c(-1, 1)) +
   labs(x = "Absolute Latitude (\u00b0)", y = "Log Response Ratio") +
   scale_colour_viridis_d(option = "plasma") +
   theme_mods
 
 fig_moderators_lat
-ggsave("Extended Data Fig. 4 - abs(latitude).pdf", fig_moderators_lat,
-       path = here::here("figures", "ExtendedData"), width = 200, height = 200, units = "mm", device = cairo_pdf)
+ggsave("SupplementaryFigure_04_latitude.pdf", fig_moderators_lat,
+       path = here::here("figures"), width = 200, height = 200, units = "mm", device = cairo_pdf)
 
 # Supplementary Fig. 5 — Experiment duration ------------------------------
 
@@ -225,13 +227,14 @@ fig_moderators_time <- ggplot() +
              aes(x = experiment_duration, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
   scale_x_continuous(limits = c(.5, 22), breaks = c(1, 5, 10, 15, 21)) +
+  coord_cartesian(ylim = c(-1, 1)) +
   labs(x = "Experiment duration (years)", y = "Log Response Ratio") +
   scale_colour_viridis_d(option = "plasma") +
   theme_mods
 
 fig_moderators_time
-ggsave("Extended Data Fig. 5 - Experiment duration.pdf", fig_moderators_time,
-       path = here::here("figures", "ExtendedData"), width = 200, height = 200, units = "mm", device = cairo_pdf)
+ggsave("SupplementaryFigure_05_duration.pdf", fig_moderators_time,
+       path = here::here("figures"), width = 200, height = 200, units = "mm", device = cairo_pdf)
 
 # Supplementary Fig. 6 — Response variable --------------------------------
 
@@ -273,12 +276,13 @@ fig_moderators_resp_var <- ggplot() +
                   aes(x = response_variable, y = Estimate,
                       ymin = Q2.5, ymax = Q97.5),
                   linewidth = 1, size = 0.6, colour = "black") +
+  coord_cartesian(ylim = c(-1, 1)) +
   labs(x = "Response variable", y = "Log Response Ratio") +
   scale_colour_viridis_d(option = "plasma") +
   theme_mods
 
 fig_moderators_resp_var
-ggsave("Extended Data Fig. 6 - response_variable.pdf", fig_moderators_resp_var,
-       path = here::here("figures", "ExtendedData"), width = 200, height = 200, units = "mm", device = cairo_pdf)
+ggsave("SupplementaryFigure_06_response_variable.pdf", fig_moderators_resp_var,
+       path = here::here("figures"), width = 200, height = 200, units = "mm", device = cairo_pdf)
 
 

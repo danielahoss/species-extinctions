@@ -71,6 +71,6 @@ map_UFZ <- ggplot() +
 
 map_UFZ
 
-ggsave("Extended Data Fig. 1 - map.pdf", map_UFZ, path = "figures",
+ggsave("SupplementaryFigure_01_map.pdf", map_UFZ, path = "figures",
        width = 250, height = 140, units = "mm", dpi = 300)
  

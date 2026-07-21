@@ -113,17 +113,17 @@ ft <- flextable(all_rows) %>%
   valign(valign = "top", part = "body") %>%
 
   # Caption
-  set_caption("Supplementary Table. Bayesian meta-analytic model summaries. Estimates are posterior means with posterior standard deviation (SD) and 95% credible intervals (Q2.5, Q97.5). All models use a normal likelihood with known sampling variance se(sei). Random effects represent between-study (\u03c4 study) and within-study between-effect-size (\u03c4 effect size) standard deviations.")
+  set_caption("Supplementary Table S1. Bayesian meta-analytic model summaries. Estimates are posterior means with posterior standard deviation (SD) and 95% credible intervals (Q2.5, Q97.5). All models use a normal likelihood with known sampling variance se(sei). Random effects represent between-study (\u03c4 study) and within-study between-effect-size (\u03c4 effect size) standard deviations.")
 
 ft
 
 # 6. Save to Word -------------------------------------------------------------
 
 doc <- read_docx() %>%
-  body_add_par("Supplementary Table — Meta-analysis model summaries",
+  body_add_par("Supplementary Table S1: Meta-analysis model summaries",
                style = "heading 1") %>%
   body_add_flextable(ft)
 
-print(doc, target = here::here("SupplementaryTable_meta_models.docx"))
+print(doc, target = here::here("SupplementaryTable_S1_meta_models.docx"))
 
-message("Saved: SupplementaryTable_meta_models.docx")
+message("Saved: SupplementaryTable_S1_meta_models.docx")
