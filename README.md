@@ -2,6 +2,8 @@
 
 Daniela Hoss, Shane A. Blowes, Felícia M. Fischer, Tomas Herben, Emma Ladouceur, Valério D. Pillar, Helge Bruelheide, Jonathan M. Chase
 
+**Code authors:** Daniela Hoss and Shane A. Blowes
+
 ## Overview
 
 This repository contains the R scripts used to reproduce all analyses and figures in the manuscript.
@@ -40,7 +42,7 @@ Scripts are numbered in execution order. `.1` scripts fit Bayesian models (compu
 
 | Script | Produces |
 |--------|----------|
-| `3.1q_productivity_model_typemod.R` | Type-moderator productivity model (`model_removed_propo_typemod`) |
+| `3.1a_productivity_model_typemod.R` | Type-moderator productivity model (`model_removed_propo_typemod`) |
 | `3.1b_productivity_plot_typemod.R` | Figure 2 |
 | `3.2a_productivity_models_separate.R` | Separate biomass / cover models (sensitivity; `model_biomass_2`, `model_cover_2`) |
 | `3.2b_productivity_plot_comparison.R` | Supplementary Fig. 8 (combined vs. separate, 1:1 slope comparison) |
@@ -59,14 +61,14 @@ Scripts are numbered in execution order. `.1` scripts fit Bayesian models (compu
 | Script | Produces |
 |--------|----------|
 | `5.1a_additional_disturbances_model_typemod.R` | Type-moderator additional-disturbances model (`model_dist_typemod`) |
-| `5.2b_additional_disturbances_plot_typemod.R` | Supplementary Fig. 12 (additional disturbances) |
+| `5.1b_additional_disturbances_plot_typemod.R` | Supplementary Fig. 12 (additional disturbances) |
 
 ### Supplementary figures and diagnostics
 
 | Script | Produces |
 |--------|----------|
-| `6_Supp_fig_Map.r` | Supplementary Fig. 1 (study map) |
-| `11_supp_figures_typemod.R` | Supplementary residual and overall-slope figures |
+| `6_supp_fig_map.R` | Supplementary Fig. 1 (study map) |
+| `7_supp_figures_typemod.R` | Supplementary residual and overall-slope figures |
 
 
 ## Requirements
