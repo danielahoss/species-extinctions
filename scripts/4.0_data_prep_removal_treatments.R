@@ -15,8 +15,6 @@ df_biom <- read.csv(here("data", "df_biom_brm_2.csv"), header = TRUE)
 df_biom <- df_biom %>%
   filter(!(pre_removal == 1 & removal_treatment_category_v2 != "control" & time_length_years == 1))
 
-as.factor(df_biom$removal_treatment_category_v2) %>% levels
-
 # Subordinate
 df_sub_biom <- df_biom %>%
   group_by(study_ID) %>%
@@ -57,8 +55,6 @@ df_biomass_trt <- bind_rows(df_sub_biom, df_traits_biom, df_dom_biom) %>%
   mutate(removal_trt = factor(removal_trt)) %>%
   mutate(block = as.character(block),
          productivity = biomass)
-
-as.factor(df_biomass_trt$removal_trt) %>% levels
 
 # write.csv(df_biomass_trt, row.names = FALSE, here("data", "df_biomass_trt.csv"))
 

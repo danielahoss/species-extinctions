@@ -1,5 +1,5 @@
-# World map — UFZ presentation
-# Study locations only, clean presentation style
+# Supplementary Fig. 1: geographic distribution of the study locations
+# Study points (jittered up to +/-2 degrees) on a Mollweide world map.
 
 library(tidyverse)
 library(sf)
@@ -8,8 +8,7 @@ library(rnaturalearth)
 rm(list = ls())
 if (!is.null(dev.list())) dev.off()
 
-effects_brm <- read.csv(here::here("data", "moderators.csv"), header = TRUE) %>%
-  filter(study_ID != "ID_42") %>%
+effects_brm <- read.csv(here::here("data", "moderators_Synthesis_MA.csv"), header = TRUE) %>%
   distinct(study_ID, .keep_all = TRUE)
 
 sf::sf_use_s2(FALSE)
@@ -39,13 +38,13 @@ lon_labels <- data.frame(
   label = c("120°W", "80°W", "40°W", "0°", "40°E", "80°E", "120°E")
 )
 
-map_UFZ <- ggplot() +
+map_supp <- ggplot() +
 
   geom_sf(data = world_sf,
           fill = "#DAC17C", colour = NA) +
 
   geom_sf(data = effects_sf,
-          shape = 21, size = 2, stroke = 0.7,
+          shape = 21, size = 1, stroke = 0.7,
           fill = "black", colour = "black", alpha = 0.95) +
 
   annotate("text", x = lat_labels$x, y = lat_labels$y, label = lat_labels$label,
@@ -69,8 +68,8 @@ map_UFZ <- ggplot() +
  
  
 
-map_UFZ
+map_supp
 
-ggsave("SupplementaryFigure_01_map.pdf", map_UFZ, path = "figures",
+ggsave(here::here("figures", "SupplementaryFigure_01_map.pdf"), map_supp,
        width = 250, height = 140, units = "mm", dpi = 300)
  

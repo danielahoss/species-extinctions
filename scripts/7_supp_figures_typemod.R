@@ -1,10 +1,10 @@
-# Supplementary figures regenerated from the type-moderator models (Round 3)
+# Supplementary figures regenerated from the type-moderator models
 # ---------------------------------------------------------------------------
 #   Supplementary Fig. 9  productivity model residuals (DHARMa)
-#   Supplementary Fig. 10 removal-treatment model residuals (DHARMa)
-#   Supplementary Fig. 11 overall removal slope per treatment (halfeye)
-#   Supplementary Fig. 13 additional-disturbances figure (built in scripts/5.2c;
-#                         Supplementary Fig. 12 is the PRISMA flow diagram)
+#   Supplementary Fig. 10 overall removal slope per treatment (halfeye)
+#   Supplementary Fig. 11 removal-treatment model residuals (DHARMa)
+#   Supplementary Fig. 12 additional-disturbances figure (built in scripts/5.2;
+#                         Supplementary Fig. 13 is the PRISMA flow diagram)
 # Models: model_removed_propo_typemod, model_remtrt_typemod (scripts 3.1c/4.1c)
 
 library(tidyverse)
@@ -78,7 +78,7 @@ ggsave(here("figures", "SupplementaryFigure_09_productivity_residuals.pdf"),
 message("saved Supplementary Fig. 9")
 rm(mp, rp, db, dc, cov9); gc()
 
-# ---- Supplementary Fig. 10: removal-treatment residuals ---------------------
+# ---- Supplementary Fig. 11: removal-treatment residuals ---------------------
 mt <- read_rds(here("model_output", "model_remtrt_typemod.rds"))
 rt <- resid_df(mt)
 fig9 <- (bp(rt, "time_length_years", "Time (years)") +
@@ -87,11 +87,11 @@ fig9 <- (bp(rt, "time_length_years", "Time (years)") +
          bp(rt, "removed_bin", "Proportion removed (binned)") +
          bp(rt, "study_ID", "Study ID", xangle = 45)) +
   plot_annotation(tag_levels = "a") + plot_layout(ncol = 2)
-ggsave(here("figures", "SupplementaryFigure_10_removal_treatment_residuals.pdf"),
+ggsave(here("figures", "SupplementaryFigure_11_removal_treatment_residuals.pdf"),
        fig9, width = 180, height = 210, units = "mm", device = cairo_pdf)
-message("saved Supplementary Fig. 10")
+message("saved Supplementary Fig. 11")
 
-# ---- Supplementary Fig. 11: overall removal slope per treatment -------------
+# ---- Supplementary Fig. 10: overall removal slope per treatment -------------
 d <- as_draws_df(mt)
 sl <- tibble(
   Dominant    = d$b_removed_propo,
@@ -120,12 +120,12 @@ fig10 <- ggplot(sl, aes(x = slope, y = removal_trt, fill = removal_trt, colour =
         strip.background = element_blank(), axis.text.y = element_blank(),
         axis.ticks.y = element_blank(), axis.title.x = element_text(face = "bold"),
         text = element_text(size = 10, family = "Helvetica"))
-ggsave(here("figures", "SupplementaryFigure_11_overall_slopes.pdf"),
+ggsave(here("figures", "SupplementaryFigure_10_overall_slopes.pdf"),
        fig10, width = 110, height = 100, units = "mm", device = cairo_pdf)
-message("saved Supplementary Fig. 11")
+message("saved Supplementary Fig. 10")
 
-# ---- Supplementary Fig. 13: additional disturbances -------------------------
+# ---- Supplementary Fig. 12: additional disturbances -------------------------
 # Built in its own script (type-moderator disturbance model):
-#   scripts/5.2c_additional_disturbances_plot_typemod.R
-#   -> figures/SupplementaryFigure_13_additional_disturbances.pdf
-# (Supplementary Fig. 12 is the PRISMA flow diagram, prepared separately.)
+#   scripts/5.2_additional_disturbances_plot_typemod.R
+#   -> figures/SupplementaryFigure_12_additional_disturbances.pdf
+# (Supplementary Fig. 13 is the PRISMA flow diagram, prepared separately.)

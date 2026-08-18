@@ -1,13 +1,13 @@
-# Supplementary Fig. 13 from the type-moderator additional-disturbances model
+# Supplementary Fig. 12 from the type-moderator additional-disturbances model
 # ---------------------------------------------------------------------------
-# Path A (measurement type on mean + sigma). A single combined model where the
+# A single combined model (measurement type on the mean and variance) where the
 # proportion-removed effect interacts with the additional disturbance applied
 # (no additional disturbance = reference; drought, nutrient, warming as offsets).
 #   (a) productivity vs proportion removed, one fitted line per disturbance
 #       (marginalised over measurement type, drawn over each disturbance's
 #       observed removal range);
 #   (b) overall proportion-removed slope per disturbance, summarised at 50%
-#       removal (matching Fig 2 / Supplementary Fig. 11).
+#       removal (matching Fig 2 / Supplementary Fig. 10).
 # Model: model_output/model_dist_typemod.rds (scripts/5.1)
 
 library(tidyverse)
@@ -128,6 +128,6 @@ final_plot <- (plot_a | plot_b) / wrap_elements(legend_gg) +
   plot_annotation(tag_levels = list(c("a", "b", ""))) +
   plot_layout(heights = c(20, -0.5))
 
-ggsave(here("figures", "SupplementaryFigure_13_additional_disturbances.pdf"),
+ggsave(here("figures", "SupplementaryFigure_12_additional_disturbances.pdf"),
        final_plot, width = 200, height = 150, units = "mm", device = cairo_pdf)
-message("saved Supplementary Fig. 13")
+

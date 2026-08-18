@@ -1,16 +1,12 @@
 # Separate productivity models: biomass and cover fit independently
 # ---------------------------------------------------------------------------
-# Round 3 revision (Reviewer #2 Comment 2.2 / Reviewer #3 Comment 3.2):
-# instead of pooling biomass and cover into a single lognormal model
-# (scripts/3.1_productivity_model.R), we fit the two response types as two
-# separate models with the SAME structure, and present them side by side
-# (scripts/3.2b_productivity_plot_separate.R). This is the analysis both
-# reviewers requested ("model biomass and percent cover separately").
+# Sensitivity analysis to the combined type-moderator model (scripts/3.1a):
+# biomass and cover are fit as two separate lognormal models with the same
+# structure and compared side by side (scripts/3.2b_productivity_plot_comparison.R).
 #
-# Structure is identical to the pooled model:
+# Structure (identical for both fits; only the response data differ):
 #   productivity ~ removed_propo + (removed_propo | study_ID/block/plot)
 #                                 + (1 | time_length_years),  lognormal()
-# Only the response data differ between the two fits.
 #
 # Output: model_output/model_biomass_2.rds, model_output/model_cover_2.rds
 
@@ -18,7 +14,7 @@ library(tidyverse)
 library(brms)
 library(here)
 
-seed <- 321   # matches scripts/3.1_productivity_model.R
+seed <- 321
 
 # 1. Data ---------------------------------------------------------------------
 

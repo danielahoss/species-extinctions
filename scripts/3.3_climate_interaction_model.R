@@ -1,24 +1,19 @@
-# Climate interaction robustness check (Reviewer #3, Point 3)
+# Climate interaction robustness check
 # --------------------------------------------------------------------------
 # Tests whether the effect of species removal on productivity depends on
-# climate, by adding a removed_propo x climate interaction to the
-# productivity model. This is the minimal analysis R3 requested as a fallback
-# to full random climate slopes ("at least test for an interaction between
-# climate and the proportion of species removed").
+# climate, by adding a removed_propo x climate interaction to the productivity
+# model.
 #
-# Design decisions:
-#   - Biomass and cover are modelled SEPARATELY (units differ; matches the
-#     separate models reported in Supplementary Table 1), so this doubles as a
-#     response to the pooling concern.
-#   - Temperature and precipitation are tested in SEPARATE models (as with the
-#     meta-analysis moderators), so that studies missing one climate variable
-#     do not drop out of the test for the other.
-#   - Base structure mirrors scripts/3.1_productivity_model.R:
-#       lognormal, (removed_propo | study_ID/block/plot) + (1 | time_length_years)
-#   - A non-significant interaction (95% CrI spanning 0) supports the
-#     conclusion that the removal effect is consistent across the climate
-#     gradient.
-# Output: model_output/int_{biom,cover}_{temp,ppt}.rds
+# Design:
+#   - Biomass and cover are modelled separately (units differ).
+#   - Temperature and precipitation are tested in separate models, so that
+#     studies missing one climate variable do not drop out of the test for the
+#     other.
+#   - Base structure: lognormal, removed_propo x climate +
+#       (removed_propo | study_ID/block/plot) + (1 | time_length_years).
+#   - An interaction whose 95% CrI spans 0 indicates the removal effect is
+#     consistent across the sampled climate gradient.
+# Output: model_output/int_{biom,cover,pool}_{temp,ppt}.rds
 
 # 1. Libraries ----------------------------------------------------------------
 

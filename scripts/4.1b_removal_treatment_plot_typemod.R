@@ -1,13 +1,13 @@
-# Figure 3 from the type-moderator removal-treatment model (Path A)
+# Figure 3 from the type-moderator removal-treatment model
 # ---------------------------------------------------------------------------
-# Same layout as scripts/4.2 (colour = removal treatment, shape = measurement
-# type), driven by model_remtrt_typemod (measure on mean + sigma; scripts/4.1c).
+# Colour = removal treatment, shape = measurement type, driven by
+# model_remtrt_typemod (measure on mean + sigma).
 #   (a) productivity vs proportion removed, one fitted line per treatment
 #       (marginalised over measurement type, and drawn only over each
 #       treatment's observed removal range);
-#   (b) study-level slopes as a forest, faceted by treatment, summarised at
+#   (b) study-level effects as a forest, faceted by treatment, summarised at
 #       50% removal (matching Fig 2).
-# Model: model_output/model_remtrt_typemod.rds
+# Model: model_output/model_remtrt_typemod.rds (fit: scripts/4.1)
 
 library(tidyverse)
 library(brms)
@@ -132,10 +132,10 @@ plot_b <- ggplot(draws_plot,
   scale_x_continuous(breaks = log(c(0.10, 0.30, 0.50, 0.75, 1.0, 1.5)),
                      labels = c("-90%", "-70%", "-50%", "-25%", "0%", "+50%")) +
   coord_cartesian(xlim = c(-2.4, 0.55), clip = "off") +
-  labs(x = "Proportional change at 50% removal", y = NULL) +
+  labs(x = "Expected change in productivity\nat 50% of species removed", y = "Study") +
   theme_classic() +
   theme(legend.position = "none", strip.text = element_blank(),
-        strip.background = element_blank(), axis.title.x = element_text(face = "bold"),
+        strip.background = element_blank(), axis.title = element_text(face = "bold"),
         text = element_text(size = 10, family = "Helvetica"))
 
 # ---- legend (shape = measure), fixed -----------------------------------------
@@ -154,7 +154,7 @@ final_plot <- (plot_a | plot_b) / wrap_elements(legend_gg) +
 
 final_plot
 
-ggsave(here("figures", "Fig3_typemod_canonical.png"),
+ggsave(here("figures", "Fig3_typemod.png"),
        final_plot, width = 200, height = 150, units = "mm", dpi = 300)
 
 # ggsave(

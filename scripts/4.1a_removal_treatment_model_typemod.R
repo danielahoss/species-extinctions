@@ -1,8 +1,7 @@
-# Removal-treatment model with measurement type as a predictor (Path A) — Fig 3
+# Removal-treatment model with measurement type as a predictor — Fig 3
 # ---------------------------------------------------------------------------
-# Round 3 revision. Takes the LOO-selected removal-treatment model
-# (scripts/4.1, fit3_inter: removed_propo x removal_trt interaction) and adds
-# measurement type as a predictor of BOTH the mean and the variance:
+# The removal-treatment model (removed_propo x removal_trt interaction) with
+# measurement type added as a predictor of both the mean and the variance:
 #   productivity ~ 0 + removed_propo + removal_trt + removed_propo:removal_trt
 #                    + measure
 #                    + (0 + removed_propo + removal_trt + removed_propo:removal_trt
@@ -10,17 +9,12 @@
 #                    + (1 | time_length_years),
 #   sigma ~ measure ,  lognormal()
 #
-# Model SELECTION stays on the combined data (a question about structure, which
-# the units concern does not affect); adding measure on mean + sigma addresses
-# the units concern (reviewers' route c). Fully separate models are infeasible
-# here because some treatment x response-type cells contain a single study
-# (cover x subordinate = 1). The treatment conclusions are unchanged: dominant
-# removal drives the largest, clearly credible decline (-1.97 [-2.67, -1.31];
-# ~-63% at 50% removal), with shallower, more uncertain effects for traits and
-# subordinate removals.
+# Fully separate biomass/cover models are not feasible here because some
+# treatment x response-type cells contain a single study (e.g. cover x
+# subordinate = 1). Dominant is the reference treatment level.
 #
 # Output: model_output/model_remtrt_typemod.rds
-# Plot:   scripts/4.2c_removal_treatment_plot_typemod.R
+# Plot:   scripts/4.2_removal_treatment_plot_typemod.R
 
 library(tidyverse)
 library(brms)
@@ -56,6 +50,3 @@ model_remtrt_typemod <- brm(
 
 model_remtrt_typemod %>% summary()
 model_remtrt_typemod %>% pp_check()
-
-# slopes per treatment (dominant is the reference level)
-emtrends(model_remtrt_typemod, ~ removal_trt, var = "removed_propo")

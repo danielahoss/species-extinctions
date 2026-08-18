@@ -30,38 +30,7 @@ effects <- effects_brm %>%
     time_pad = as.numeric(scale(as.numeric(experiment_duration), center = TRUE, scale = FALSE)))
 
 
-# Supplementary Fig. 2 - mean annual precipitation ------------------------
-
-mod_ppt <- brm(
-  data    = effects,
-  formula = yi | se(sei) ~ 1 + ppt_pad + (1 | study_ID/ES_ij),
-  cores   = 4, chains = 4,
-  backend = "cmdstanr",
-  seed    = 321,
-  file    = here("model_output", "ma_moderators_ppt")
-)
-
-mod_ppt <- read_rds(here::here("model_output", "ma_moderators_ppt.rds")) 
-
-mod_ppt %>% summary
-
-pp_check(mod_ppt) 
-conditional_effects(mod_ppt)
-
-
-model.check <- createDHARMa(
-  simulatedResponse = t(posterior_predict(mod_ppt)),
-  observedResponse = effects$yi,
-  fittedPredictedResponse = apply(t(posterior_epred(mod_ppt)), 1, mean),
-  integerResponse = FALSE)
-
-
-plot(model.check)  # qq and residuals
-
-testDispersion(model.check)
-
-
-# Supplementary Fig. 3 - mean annual temperature --------------------------
+# Supplementary Fig. 2 - mean annual temperature --------------------------
 
 
 effects_temp <- effects
@@ -98,6 +67,38 @@ model.check <- createDHARMa(
 plot(model.check)  # qq and residuals
 
 testDispersion(model.check)
+
+# Supplementary Fig. 3 - mean annual precipitation ------------------------
+
+mod_ppt <- brm(
+  data    = effects,
+  formula = yi | se(sei) ~ 1 + ppt_pad + (1 | study_ID/ES_ij),
+  cores   = 4, chains = 4,
+  backend = "cmdstanr",
+  seed    = 321,
+  file    = here("model_output", "ma_moderators_ppt")
+)
+
+mod_ppt <- read_rds(here::here("model_output", "ma_moderators_ppt.rds")) 
+
+mod_ppt %>% summary
+
+pp_check(mod_ppt) 
+conditional_effects(mod_ppt)
+
+
+model.check <- createDHARMa(
+  simulatedResponse = t(posterior_predict(mod_ppt)),
+  observedResponse = effects$yi,
+  fittedPredictedResponse = apply(t(posterior_epred(mod_ppt)), 1, mean),
+  integerResponse = FALSE)
+
+
+plot(model.check)  # qq and residuals
+
+testDispersion(model.check)
+
+
 
 # Supplementary Fig. 4 - abs(latitude) ------------------------------------
 

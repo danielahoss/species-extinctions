@@ -1,21 +1,18 @@
-# Type-moderator productivity model (Path A) — canonical Fig 2 model
+# Type-moderator productivity model — canonical Fig 2 model
 # ---------------------------------------------------------------------------
-# Round 3 revision (Reviewer #2 Comment 2.2 / Reviewer #3 Comment 3.2).
-# Rather than pooling biomass and cover blindly (scripts/3.1) or fitting them
-# fully separately (scripts/3.1b), we include measurement type as a moderator
-# of BOTH the mean and the variance of productivity — the reviewers' route (c):
+# Biomass and cover are combined in a single model with measurement type as a
+# moderator of both the mean and the residual variance:
 #   productivity ~ removed_propo * measure + (removed_propo | study_ID/block/plot)
 #                                           + (1 | time_length_years),
 #   sigma ~ measure ,  lognormal()
-# The removed_propo:measure term is a formal in-model test of whether the
-# productivity response to species removal differs by measurement type
-# (it does not: 0.16, 95% CrI -0.88 to 1.26), and sigma ~ measure gives each
-# response type its own residual dispersion (biomass 0.27 vs cover 0.33).
-# This approach is used uniformly for Fig 2 and Fig 3 (removal treatments),
-# where fully separate models are infeasible (cover x subordinate = 1 study).
+# The removed_propo:measure term tests whether the productivity response to
+# species removal differs between biomass and cover; sigma ~ measure gives each
+# response type its own residual dispersion. The same structure is used for the
+# removal-treatment model (Fig 3), where fully separate biomass/cover models are
+# infeasible (e.g. cover x subordinate = 1 study).
 #
 # Output: model_output/model_removed_propo_typemod.rds
-# Plot:   scripts/3.2c_productivity_plot_typemod.R
+# Plot:   scripts/3.2a_productivity_plot_typemod.R
 
 library(tidyverse)
 library(brms)

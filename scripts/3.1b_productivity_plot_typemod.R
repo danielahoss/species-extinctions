@@ -1,20 +1,19 @@
-# Figure 2 from the type-moderator productivity model (Path A)
+# Figure 2 from the type-moderator productivity model
 # ---------------------------------------------------------------------------
-# Round 3 revision. The single model
+# The single model
 #   productivity ~ removed_propo * measure + (removed_propo | study_ID/block/plot)
 #                                           + (1 | time_length_years),
 #   sigma ~ measure ,  lognormal()
 # includes measurement type (biomass vs cover) as a moderator of both the mean
-# (with a removed_propo x measure interaction — the in-model consistency test)
-# and the variance (sigma ~ measure). See scripts/3.1c below for the fit.
+# (with a removed_propo x measure interaction) and the variance (sigma ~ measure).
 #
-# Figure is still plotted split by measure (biomass = orange, cover = green):
+# The figure is plotted split by measure (biomass = orange, cover = green):
 #   (a) scatter with the two population-level curves + per-study lines/points;
-#   (b) forest of per-study slopes with the two overall-effect reference lines.
+#   (b) forest of per-study effects with the two overall-effect reference lines.
 # A cover study's intercept/slope add the measurecover main effect and the
-# removed_propo:measurecover interaction, so both curves come from the ONE model.
+# removed_propo:measurecover interaction, so both curves come from the one model.
 #
-# Model: model_output/model_removed_propo_typemod.rds
+# Model: model_output/model_removed_propo_typemod.rds (fit: scripts/3.1a)
 
 library(tidyverse)
 library(brms)
@@ -57,9 +56,12 @@ scoef <- left_join(study_sl, xr, by = "study_ID")
 
 # 2. Population-level curves per measure (re_formula = NA) ---------------------
 
-grid <- expand_grid(
-  removed_propo = seq(0, max(d$removed_propo), length.out = 120),
-  measure = factor(c("biomass", "cover"), levels = c("biomass", "cover")))
+# draw each response type's population curve only across its own observed
+# removal range (cover data stop at ~67%, biomass reach ~97%)
+xmax_m <- tapply(d$removed_propo, d$measure, max)
+grid <- bind_rows(lapply(names(xmax_m), function(lv)
+  tibble(measure = lv, removed_propo = seq(0, xmax_m[[lv]], length.out = 120)))) %>%
+  mutate(measure = factor(measure, levels = c("biomass", "cover")))
 overall <- bind_cols(
   grid,
   as_tibble(fitted(m, newdata = grid, re_formula = NA, scale = "linear",
@@ -112,9 +114,7 @@ plot_scatter <- ggplot() +
 
 # Summarise the forest at 50% removal (the level highlighted in the paper):
 # the model slope is the change in log(productivity) per unit removed_propo, so
-# the log proportional change at 50% removal is slope * 0.5. This keeps the
-# summary within the observed removal range (data mostly reach ~0.67; only 3/24
-# studies remove >=0.9) and matches the "~-50% at 50% removal" figures in text.
+# the log proportional change at 50% removal is slope * 0.5. 
 rlev <- 0.5
 
 labs_n <- pts %>% count(study_ID) %>% mutate(label = paste0(study_ID, " (n=", n, ")"))
@@ -137,9 +137,9 @@ plot_forest <- ggplot(sl, aes(x = chg, y = label, colour = measure)) +
   scale_x_continuous(breaks = log(c(0.10, 0.30, 0.50, 0.75, 1.0, 1.5)),
                      labels = c("-90%", "-70%", "-50%", "-25%", "0%", "+50%")) +
   coord_cartesian(xlim = c(-2.4, 0.55)) +
-  labs(x = "Proportional change at 50% removal", y = NULL) +
+  labs(x = "Expected change in productivity\nat 50% of species removed", y = "Study") +
   theme_classic() +
-  theme(legend.position = "none", axis.title.x = element_text(face = "bold"),
+  theme(legend.position = "none", axis.title = element_text(face = "bold"),
         text = element_text(size = 10, family = "Helvetica"))
 
 # 6. Shared legend + assembly -------------------------------------------------
