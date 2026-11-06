@@ -1,14 +1,8 @@
-# Supplementary Fig. 12 from the type-moderator additional-disturbances model
+# Supplementary Fig. 12: productivity response with additional disturbances
 # ---------------------------------------------------------------------------
-# A single combined model (measurement type on the mean and variance) where the
-# proportion-removed effect interacts with the additional disturbance applied
-# (no additional disturbance = reference; drought, nutrient, warming as offsets).
-#   (a) productivity vs proportion removed, one fitted line per disturbance
-#       (marginalised over measurement type, drawn over each disturbance's
-#       observed removal range);
-#   (b) overall proportion-removed slope per disturbance, summarised at 50%
-#       removal (matching Fig 2 / Supplementary Fig. 10).
-# Model: model_output/model_dist_typemod.rds (scripts/5.1)
+# (a) fitted line per disturbance; (b) overall effect at 50% of species removed.
+#
+# Model: model_output/model_dist_typemod.rds (fit in 5.1a)
 
 library(tidyverse)
 library(brms)

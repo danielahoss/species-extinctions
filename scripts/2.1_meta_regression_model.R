@@ -24,7 +24,7 @@ effects <- effects_brm %>%
   ungroup() %>%
   mutate(
     lat_pad = round(as.numeric(scale(as.numeric(latitude_abs), center = TRUE, scale = FALSE)),2),
-    ppt_pad = round(as.numeric(scale(as.numeric(mean_annual_ppt_mm), center = TRUE, scale = FALSE)),2),
+    ppt_pad = round(as.numeric(scale(as.numeric(mean_annual_ppt_mm) / 100, center = TRUE, scale = FALSE)),2),  # centred, in units of 100 mm/yr
     temp_pad = round(as.numeric(scale(as.numeric(mean_annual_temperature_Celsius), center = TRUE, scale = FALSE)),2),
     alt_pad = round(as.numeric(scale(as.numeric(altitude_m), center = TRUE, scale = FALSE)),0),
     time_pad = as.numeric(scale(as.numeric(experiment_duration), center = TRUE, scale = FALSE)))
@@ -73,6 +73,8 @@ testDispersion(model.check)
 mod_ppt <- brm(
   data    = effects,
   formula = yi | se(sei) ~ 1 + ppt_pad + (1 | study_ID/ES_ij),
+  iter    = 4000, warmup = 1000,
+  control = list(adapt_delta = 0.99, max_treedepth = 12),
   cores   = 4, chains = 4,
   backend = "cmdstanr",
   seed    = 321,
@@ -166,6 +168,8 @@ testDispersion(model.check)
 mod_resp <- brm(
   data    = effects,
   formula = yi | se(sei) ~ 0 + response_variable + (1 | study_ID/ES_ij),
+  iter    = 4000, warmup = 1000,
+  control = list(adapt_delta = 0.99, max_treedepth = 12),
   cores   = 4, chains = 4,
   backend = "cmdstanr",
   seed    = 321,
@@ -196,6 +200,8 @@ testDispersion(model.check)
 mod_covars <- brm(
   data    = effects,
   formula = yi | se(sei) ~ 1 + lat_pad + ppt_pad + temp_pad + (1 | study_ID/ES_ij),
+  iter    = 4000, warmup = 1000,
+  control = list(adapt_delta = 0.99, max_treedepth = 12),
   cores   = 4, chains = 4,
   backend = "cmdstanr",
   seed    = 321,

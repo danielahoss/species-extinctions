@@ -1,11 +1,8 @@
-# Supplementary figures regenerated from the type-moderator models
+# Supplementary Figs. 9-11
 # ---------------------------------------------------------------------------
-#   Supplementary Fig. 9  productivity model residuals (DHARMa)
-#   Supplementary Fig. 10 overall removal slope per treatment (halfeye)
-#   Supplementary Fig. 11 removal-treatment model residuals (DHARMa)
-#   Supplementary Fig. 12 additional-disturbances figure (built in scripts/5.2;
-#                         Supplementary Fig. 13 is the PRISMA flow diagram)
-# Models: model_removed_propo_typemod, model_remtrt_typemod (scripts 3.1c/4.1c)
+#   Fig. 9   residuals, productivity model (3.1a)
+#   Fig. 10  removal slope per treatment (4.1a)
+#   Fig. 11  residuals, removal-treatment model (4.1a)
 
 library(tidyverse)
 library(brms)
@@ -48,11 +45,9 @@ resid_df <- function(m) {
 }
 
 # ---- Supplementary Fig. 9: productivity residuals ---------------------------
-# The model data carries only removed_propo/measure, so richness, experiment
-# duration and removal method are re-attached from the raw CSVs in the SAME row
-# order the model was built with (biomass rows, ID_29 abundance treatments
-# excluded, then cover rows).
-mp <- read_rds(here("model_output", "model_removed_propo_typemod.rds"))
+# Richness, experiment duration and removal method are re-attached from the raw
+# CSVs in the row order of the model data (biomass, then cover).
+mp <- read_rds(here("model_output", "model_removed_propo_typemod_3.rds"))
 db <- read.csv(here("data", "df_biom_brm_2.csv")) %>%
   filter(!(study_ID == "ID_29" &
              removal_treatment %in% c("abundance_reduction", "abundance_richness_reduction"))) %>%
@@ -124,8 +119,5 @@ ggsave(here("figures", "SupplementaryFigure_10_overall_slopes.pdf"),
        fig10, width = 110, height = 100, units = "mm", device = cairo_pdf)
 message("saved Supplementary Fig. 10")
 
-# ---- Supplementary Fig. 12: additional disturbances -------------------------
-# Built in its own script (type-moderator disturbance model):
-#   scripts/5.2_additional_disturbances_plot_typemod.R
-#   -> figures/SupplementaryFigure_12_additional_disturbances.pdf
-# (Supplementary Fig. 13 is the PRISMA flow diagram, prepared separately.)
+# Supplementary Fig. 12 is made in 5.1b_additional_disturbances_plot_typemod.R
+

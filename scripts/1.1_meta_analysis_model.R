@@ -35,25 +35,35 @@ mod_meta <-
       file = here::here("model_output", "meta_brm_multi_id"))
 
 mod_meta <- read_rds(here::here("model_output", "meta_brm_multi_id.rds"))
-# 3b. Back-transformation: log response ratio -> % change ---------------------
-# The meta-analysis is fit on the log response ratio scale,
-#   LRR = log(productivity in removal / productivity in control).
-# A LRR of x corresponds to a proportional change of (exp(x) - 1) in
-# productivity relative to the control (negative = reduction, positive = gain).
+# 3b. Overall effect as % change -------------------------------------------------
+
 pct_change <- function(x) (exp(x) - 1) * 100
 
-# Overall effect (posterior mean + 95% CI), back-transformed to % change:
 overall_lrr <- fixef(mod_meta)["Intercept", c("Estimate", "Q2.5", "Q97.5")]
-round(pct_change(overall_lrr), 1)   # ~ -10% (95% CI ~ -18% to -1%)
+round(pct_change(overall_lrr), 1)
+
+# 3c. Heterogeneity: tau^2 and I^2 (multilevel definition, Nakagawa & Santos 2012) ---
+draws_meta <- as_draws_df(mod_meta)
+tau2_study <- draws_meta$sd_study_ID__Intercept^2
+tau2_es    <- draws_meta$`sd_study_ID:ES_ij__Intercept`^2
+
+w  <- 1 / effects_brm$sei^2
+s2 <- (nrow(effects_brm) - 1) * sum(w) / (sum(w)^2 - sum(w^2))
+
+summ <- function(x, digits = 3) round(c(mean = mean(x), quantile(x, c(0.025, 0.975))), digits)
+summ(tau2_study)                                                           # tau^2
+summ(100 * tau2_study / (tau2_study + tau2_es + s2), 1)                    # I^2 between-study (%)
+summ(100 * (tau2_study + tau2_es) / (tau2_study + tau2_es + s2), 1)        # I^2 total (%)
+
 # 4. Model output and diagnostics -----------------------------------------
 
 mod_meta %>% summary()
 
 mod_meta %>% get_prior()
 
-pp_check(mod_meta) # Sample data from the generative model and compare with real data
+pp_check(mod_meta)
 
-mcmc_plot(mod_meta, type = 'trace') # No divergences to plot
+mcmc_plot(mod_meta, type = 'trace')
 
 
 # 5. Residual diagnostics using DHARMa ------------------------------------
@@ -126,10 +136,7 @@ residuals_model <- residuals_model %>%
 
 
 
-# 6. plot DHARMA residual checks (inline diagnostic) -------------------------
-#     NOTE: the canonical Supplementary Fig. 7 (meta residuals) is produced by
-#     scripts/1.3_supp_fig_meta_residuals.R; the version below is kept as an
-#     inline check.
+# 6. Residual boxplots (Supplementary Fig. 7 is made in 1.3_supp_fig_meta_residuals.R)
 
 boxplot_residuals <- function(data, x, labx = x, laby = "Scaled residuals") {
   x_var <- as.name(x)

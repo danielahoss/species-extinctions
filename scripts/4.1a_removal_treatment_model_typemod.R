@@ -1,20 +1,12 @@
-# Removal-treatment model with measurement type as a predictor — Fig 3
+# Removal-treatment model (Fig 3)
 # ---------------------------------------------------------------------------
-# The removal-treatment model (removed_propo x removal_trt interaction) with
-# measurement type added as a predictor of both the mean and the variance:
-#   productivity ~ 0 + removed_propo + removal_trt + removed_propo:removal_trt
-#                    + measure
-#                    + (0 + removed_propo + removal_trt + removed_propo:removal_trt
-#                         | study_ID/block/plot)
-#                    + (1 | time_length_years),
-#   sigma ~ measure ,  lognormal()
-#
-# Fully separate biomass/cover models are not feasible here because some
-# treatment x response-type cells contain a single study (e.g. cover x
-# subordinate = 1). Dominant is the reference treatment level.
+# productivity ~ 0 + removed_propo + removal_trt + removed_propo:removal_trt + measure
+#                + (0 + removed_propo + removal_trt + removed_propo:removal_trt
+#                     | study_ID/block/plot) + (1 | time_length_years),
+# sigma ~ measure, lognormal()
 #
 # Output: model_output/model_remtrt_typemod.rds
-# Plot:   scripts/4.2_removal_treatment_plot_typemod.R
+# Plot:   scripts/4.1b_removal_treatment_plot_typemod.R
 
 library(tidyverse)
 library(brms)
@@ -33,7 +25,8 @@ df <- bind_rows(df_biom, df_cover) %>%
 
 set.seed(seed)
 model_remtrt_typemod <- brm(
-  bf(productivity ~ 0 + removed_propo + removal_trt + removed_propo:removal_trt + measure +
+  bf(productivity ~ 0 + removed_propo + removal_trt + 
+       removed_propo:removal_trt + measure +
        (0 + removed_propo + removal_trt + removed_propo:removal_trt |
           study_ID / block / plot) +
        (1 | time_length_years),
@@ -50,3 +43,5 @@ model_remtrt_typemod <- brm(
 
 model_remtrt_typemod %>% summary()
 model_remtrt_typemod %>% pp_check()
+
+

@@ -72,4 +72,6 @@ map_supp
 
 ggsave(here::here("figures", "SupplementaryFigure_01_map.pdf"), map_supp,
        width = 250, height = 140, units = "mm", dpi = 300)
+
+
  

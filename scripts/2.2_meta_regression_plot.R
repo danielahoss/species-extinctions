@@ -64,6 +64,8 @@ theme_mods <- theme(
 # Supplementary Fig. 3 — Mean annual precipitation -----------------------
 
 mod_ppt <- read_rds(here::here("model_output", "ma_moderators_ppt.rds"))
+# Fitted line dashed when the 95% CI of the slope includes zero
+cred_ppt <- { f <- fixef(mod_ppt)["ppt_pad", ]; f["Q2.5"] > 0 || f["Q97.5"] < 0 }
 
 fitted_ppt <- mod_ppt$data %>%
   bind_cols(fitted(mod_ppt, re_formula = NA, scale = "linear")) %>%
@@ -88,7 +90,8 @@ fig_moderators_ppt <- ggplot() +
               alpha = 0.2) +
   geom_line(data = fitted_ppt,
             aes(x = mean_annual_ppt_mm, y = Estimate),
-            linewidth = 1, colour = "black") +
+            linewidth = 1, colour = "black",
+            linetype = if (cred_ppt) "solid" else "dashed") +
   geom_point(data = fitted_ppt,
              aes(x = mean_annual_ppt_mm, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
@@ -107,6 +110,8 @@ ggsave("SupplementaryFigure_03_precipitation.pdf",
 # Supplementary Fig. 2 — Mean annual temperature -------------------------
 
 mod_temp <- read_rds(here::here("model_output", "ma_moderators_temp.rds"))
+# Fitted line dashed when the 95% CI of the slope includes zero
+cred_temp <- { f <- fixef(mod_temp)["temp_pad", ]; f["Q2.5"] > 0 || f["Q97.5"] < 0 }
 mod_temp %>% summary
 
 # ID_239 has two sites at different temperatures; distinguish them for the model
@@ -140,7 +145,8 @@ fig_moderators_temp <- ggplot() +
               alpha = 0.2) +
   geom_line(data = fitted_temp,
             aes(x = mean_annual_temperature_Celsius, y = Estimate),
-            linewidth = 1, colour = "black") +
+            linewidth = 1, colour = "black",
+            linetype = if (cred_temp) "solid" else "dashed") +
   geom_point(data = fitted_temp,
              aes(x = mean_annual_temperature_Celsius, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
@@ -159,6 +165,8 @@ ggsave("SupplementaryFigure_02_temperature.pdf",
 # Supplementary Fig. 4 — Absolute latitude --------------------------------
 
 mod_lat <- read_rds(here::here("model_output", "ma_moderators_lat.rds"))
+# Fitted line dashed when the 95% CI of the slope includes zero
+cred_lat <- { f <- fixef(mod_lat)["lat_pad", ]; f["Q2.5"] > 0 || f["Q97.5"] < 0 }
 mod_lat %>% summary
 
 fitted_lat <- mod_lat$data %>%
@@ -183,7 +191,8 @@ fig_moderators_lat <- ggplot() +
               alpha = 0.2) +
   geom_line(data = fitted_lat,
             aes(x = latitude_abs, y = Estimate),
-            linewidth = 1, colour = "black") +
+            linewidth = 1, colour = "black",
+            linetype = if (cred_lat) "solid" else "dashed") +
   geom_point(data = fitted_lat,
              aes(x = latitude_abs, y = yi, colour = study_ID),
              size = 2, alpha = 1) +
@@ -199,6 +208,8 @@ ggsave("SupplementaryFigure_04_latitude.pdf", fig_moderators_lat,
 # Supplementary Fig. 5 — Experiment duration ------------------------------
 
 mod_time <- read_rds(here::here("model_output", "ma_moderators_time.rds"))
+# Fitted line dashed when the 95% CI of the slope includes zero
+cred_time <- { f <- fixef(mod_time)["time_pad", ]; f["Q2.5"] > 0 || f["Q97.5"] < 0 }
 
 fitted_time <- mod_time$data %>%
   bind_cols(fitted(mod_time, re_formula = NA, scale = "linear")) %>%
@@ -222,7 +233,8 @@ fig_moderators_time <- ggplot() +
               alpha = 0.2) +
   geom_line(data = fitted_time,
             aes(x = experiment_duration, y = Estimate),
-            linewidth = 1, colour = "black") +
+            linewidth = 1, colour = "black",
+            linetype = if (cred_time) "solid" else "dashed") +
   geom_point(data = fitted_time,
              aes(x = experiment_duration, y = yi, colour = study_ID),
              size = 2, alpha = 1) +

@@ -1,13 +1,8 @@
-# Figure 3 from the type-moderator removal-treatment model
+# Figure 3: productivity response by removal treatment
 # ---------------------------------------------------------------------------
-# Colour = removal treatment, shape = measurement type, driven by
-# model_remtrt_typemod (measure on mean + sigma).
-#   (a) productivity vs proportion removed, one fitted line per treatment
-#       (marginalised over measurement type, and drawn only over each
-#       treatment's observed removal range);
-#   (b) study-level effects as a forest, faceted by treatment, summarised at
-#       50% removal (matching Fig 2).
-# Model: model_output/model_remtrt_typemod.rds (fit: scripts/4.1)
+# (a) fitted line per treatment; (b) study-level effects at 50% of species removed.
+#
+# Model: model_output/model_remtrt_typemod.rds (fit in 4.1a)
 
 library(tidyverse)
 library(brms)
@@ -54,9 +49,12 @@ icpt_of <- list(
   subordinate = post$b_removal_trtsubordinate,
   traits      = post$b_removal_trttraits)
 
-# per-treatment observed removal range: don't draw the line beyond the data
+# observed removal range per treatment
 xmax_trt <- df %>% group_by(removal_trt) %>%
   summarise(xmax = max(removed_propo, na.rm = TRUE), .groups = "drop")
+
+# Lines whose 95% credible interval for the slope includes zero are dashed
+credible_slope <- map_lgl(slope_of, ~ quantile(.x, .025) > 0 || quantile(.x, .975) < 0)
 
 line_df <- map_dfr(names(slope_of), function(trt) {
   s <- slope_of[[trt]]; i <- icpt_of[[trt]]
@@ -64,6 +62,7 @@ line_df <- map_dfr(names(slope_of), function(trt) {
   map_dfr(xg, function(x) {
     marg <- 0.5 * (exp(i + s * x) + exp(i + s * x + mcov))   # avg over measure
     tibble(removal_trt = trt, removed_propo = x,
+           credible = credible_slope[[trt]],
            y = median(marg), ymin = quantile(marg, .025), ymax = quantile(marg, .975))
   })
 })
@@ -75,7 +74,9 @@ plot_a <- ggplot() +
                                   fill = removal_trt), alpha = 0.25) +
   geom_point(data = pts, aes(removed_propo, productivity, colour = removal_trt,
                              shape = measure), size = 1, alpha = 0.45) +
-  geom_line(data = line_df, aes(removed_propo, y, colour = removal_trt), linewidth = 1.2) +
+  geom_line(data = line_df, aes(removed_propo, y, colour = removal_trt,
+                                linetype = credible), linewidth = 1.2) +
+  scale_linetype_manual(values = c(`TRUE` = "solid", `FALSE` = "dashed")) +
   scale_colour_manual(values = cv) + scale_fill_manual(values = cv) +
   scale_shape_manual(values = c(biomass = 16, cover = 17)) +
   coord_cartesian(xlim = c(0, 1)) +
@@ -106,7 +107,7 @@ draws_slopes <- draws_tidy %>%
                names_to = "removal_trt", values_to = "slope") %>%
   mutate(chg = slope * rlev)
 
-combos <- df %>% distinct(study_ID, removal_trt)
+combos <- df %>% distinct(study_ID, removal_trt, measure)
 labs_n <- df %>% count(study_ID) %>% mutate(label = paste0(study_ID, " (n=", n, ")"))
 
 draws_plot <- draws_slopes %>%
@@ -120,7 +121,7 @@ draws_plot <- draws_slopes %>%
 
 plot_b <- ggplot(draws_plot,
                  aes(x = chg, y = reorder_within(label, med, removal_trt),
-                     colour = removal_trt, fill = removal_trt)) +
+                     colour = removal_trt, fill = removal_trt, shape = measure)) +
   geom_vline(xintercept = 0, linetype = "dashed", colour = "gray50") +
   stat_halfeye(alpha = 0.7, .width = c(0.66, 0.95), slab_size = 0.5, point_size = 0.8) +
   facet_grid(removal_trt ~ ., scales = "free_y", space = "free_y") +
@@ -129,6 +130,7 @@ plot_b <- ggplot(draws_plot,
             colour = "black", size = 3, family = "Helvetica", inherit.aes = FALSE) +
   scale_y_reordered() +
   scale_colour_manual(values = cvC) + scale_fill_manual(values = cvC) +
+  scale_shape_manual(values = c(biomass = 16, cover = 17)) +
   scale_x_continuous(breaks = log(c(0.10, 0.30, 0.50, 0.75, 1.0, 1.5)),
                      labels = c("-90%", "-70%", "-50%", "-25%", "0%", "+50%")) +
   coord_cartesian(xlim = c(-2.4, 0.55), clip = "off") +
@@ -154,11 +156,6 @@ final_plot <- (plot_a | plot_b) / wrap_elements(legend_gg) +
 
 final_plot
 
-ggsave(here("figures", "Fig3_typemod.png"),
-       final_plot, width = 200, height = 150, units = "mm", dpi = 300)
+ggsave(here("figures", "Fig3.pdf"), final_plot,
+       width = 200, height = 150, units = "mm", device = cairo_pdf)
 
-# ggsave(
-#   filename = "Fig3.pdf", plot = final_plot,
-#   width = 200, height = 150, units = "mm",
-#   path = here("figures"), device = cairo_pdf
-# )

@@ -33,7 +33,8 @@ Scripts are numbered in execution order. `.1` scripts fit Bayesian models (compu
 | Script | Produces |
 |--------|----------|
 | `1.1_meta_analysis_model.R` | Random-effects meta-analytic model |
-| `1.2_meta_analysis_plot.R` | Figure 1 |
+| `1.2_meta_analysis_plot.R` | Figure 1 (`Fig1.tiff`) |
+| `_run_meta_diagnostics.R` | Meta-analysis model diagnostics (interactive helper) |
 | `1.3_supp_fig_meta_residuals.R` | Supplementary Fig. 7 (meta residuals) |
 | `2.1_meta_regression_model.R` | Meta-regression models (climate / geography moderators) |
 | `2.2_meta_regression_plot.R` | Supplementary Figs. 2–6 (moderators) |
@@ -42,8 +43,8 @@ Scripts are numbered in execution order. `.1` scripts fit Bayesian models (compu
 
 | Script | Produces |
 |--------|----------|
-| `3.1a_productivity_model_typemod.R` | Type-moderator productivity model (`model_removed_propo_typemod`) |
-| `3.1b_productivity_plot_typemod.R` | Figure 2 |
+| `3.1a_productivity_model_typemod.R` | Type-moderator productivity model (`model_removed_propo_typemod_3`) |
+| `3.1b_productivity_plot_typemod.R` | Figure 2 (`Fig2.pdf`) |
 | `3.2a_productivity_models_separate.R` | Separate biomass / cover models (sensitivity; `model_biomass_2`, `model_cover_2`) |
 | `3.2b_productivity_plot_comparison.R` | Supplementary Fig. 8 (combined vs. separate, 1:1 slope comparison) |
 | `3.3_climate_interaction_model.R` | Proportion-removed × climate interaction test (Supplementary Table 5) |
@@ -54,7 +55,8 @@ Scripts are numbered in execution order. `.1` scripts fit Bayesian models (compu
 |--------|----------|
 | `4.0_data_prep_removal_treatments.R` | Prepare the removal-treatment data subset |
 | `4.1a_removal_treatment_model_typemod.R` | Type-moderator removal-treatment model (`model_remtrt_typemod`) |
-| `4.1b_removal_treatment_plot_typemod.R` | Figure 3 |
+| `4.1b_removal_treatment_plot_typemod.R` | Figure 3 (`Fig3.pdf`) |
+| `4.1c_removal_treatment_model_comparison.R` | LOO comparison of removal-treatment models (`fit1_7`, `fit2_add_traits_7`, `model_remtrt_typemod`) |
 
 ### Additional disturbances (supplementary)
 

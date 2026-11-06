@@ -1,19 +1,18 @@
-# Supplementary Fig. 8: combined vs separate models, 1:1 comparison
+# Supplementary Fig. 8: slopes from the combined model vs the separate models
 # ---------------------------------------------------------------------------
-# A single visual check that combining biomass and cover in one model does not
-# distort the estimates. Per-study and average proportion-removed slopes from
-# the combined type-moderator model (x) vs the separate biomass/cover models
-# (y), with a 1:1 line: points on the line mean pooling with a measurement-type
-# term does not shift the estimates. All 24 studies here have raw plot-level data.
-# Models: model_removed_propo_typemod ; model_biomass_2 ; model_cover_2
-suppressMessages({library(tidyverse); library(brms); library(tidybayes)
-                  library(posterior); library(here)})
+# Study-level and average slopes from the combined model (x) and the separate
+# biomass and cover models (y), with a 1:1 line.
+#
+# Models: model_removed_propo_typemod_3 (3.1a); model_biomass_2, model_cover_2 (3.2a)
+
+
+
 rm(list = ls())
 repo <- here::here()
 col <- c(biomass = "#D55E00", cover = "#009E73")
 
 # ---- combined type-moderator model: per-study slope draws --------------------
-m  <- read_rds(file.path(repo, "model_output", "model_removed_propo_typemod.rds"))
+m  <- read_rds(file.path(repo, "model_output", "model_removed_propo_typemod_3.rds"))
 sm <- distinct(m$data, study_ID, measure)
 fx <- as_draws_df(m) %>% as_tibble() %>%
   transmute(.draw, b = b_removed_propo, bint = `b_removed_propo:measurecover`)
@@ -91,4 +90,4 @@ p <- ggplot(df, aes(c_est, s_est)) +
 
 ggsave(file.path(repo, "figures", "SupplementaryFigure_08_separate_models.pdf"),
        p, width = 130, height = 130, units = "mm", device = cairo_pdf)
-message("saved Supplementary Fig. 8 (combined vs separate slope comparison)")
+

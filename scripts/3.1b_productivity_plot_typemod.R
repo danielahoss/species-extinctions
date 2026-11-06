@@ -1,19 +1,9 @@
-# Figure 2 from the type-moderator productivity model
+# Figure 2: productivity response to species removal (biomass and cover)
 # ---------------------------------------------------------------------------
-# The single model
-#   productivity ~ removed_propo * measure + (removed_propo | study_ID/block/plot)
-#                                           + (1 | time_length_years),
-#   sigma ~ measure ,  lognormal()
-# includes measurement type (biomass vs cover) as a moderator of both the mean
-# (with a removed_propo x measure interaction) and the variance (sigma ~ measure).
+# (a) population-level curves and study-level lines; (b) study-level effects at
+# 50% of species removed.
 #
-# The figure is plotted split by measure (biomass = orange, cover = green):
-#   (a) scatter with the two population-level curves + per-study lines/points;
-#   (b) forest of per-study effects with the two overall-effect reference lines.
-# A cover study's intercept/slope add the measurecover main effect and the
-# removed_propo:measurecover interaction, so both curves come from the one model.
-#
-# Model: model_output/model_removed_propo_typemod.rds (fit: scripts/3.1a)
+# Model: model_output/model_removed_propo_typemod_3.rds (fit in 3.1a)
 
 library(tidyverse)
 library(brms)
@@ -25,7 +15,7 @@ library(here)
 
 rm(list = ls())
 
-m <- read_rds(here("model_output", "model_removed_propo_typemod.rds"))
+m <- read_rds(here("model_output", "model_removed_propo_typemod_3.rds"))
 d <- m$data
 study_measure <- distinct(d, study_ID, measure)
 
@@ -47,7 +37,7 @@ redr <- spread_draws(m, r_study_ID[study_ID, term]) %>%
          icpt  = b_Intercept     + Intercept     + if_else(is_cover, b_measurecover, 0),
          slope = b_removed_propo  + removed_propo + if_else(is_cover, b_int, 0))
 
-# per-study medians (scatter segments)
+# study-level medians
 study_sl <- redr %>% group_by(study_ID, measure) %>%
   summarise(icpt = median(icpt), slope = median(slope), .groups = "drop")
 xr <- d %>% group_by(study_ID) %>%
@@ -56,8 +46,7 @@ scoef <- left_join(study_sl, xr, by = "study_ID")
 
 # 2. Population-level curves per measure (re_formula = NA) ---------------------
 
-# draw each response type's population curve only across its own observed
-# removal range (cover data stop at ~67%, biomass reach ~97%)
+# each curve is drawn only across the observed removal range of its response type
 xmax_m <- tapply(d$removed_propo, d$measure, max)
 grid <- bind_rows(lapply(names(xmax_m), function(lv)
   tibble(measure = lv, removed_propo = seq(0, xmax_m[[lv]], length.out = 120)))) %>%
@@ -112,9 +101,7 @@ plot_scatter <- ggplot() +
 
 # 5. Panel b: forest with two overall-effect reference lines ------------------
 
-# Summarise the forest at 50% removal (the level highlighted in the paper):
-# the model slope is the change in log(productivity) per unit removed_propo, so
-# the log proportional change at 50% removal is slope * 0.5. 
+# change in log(productivity) at 50% removal = slope * 0.5
 rlev <- 0.5
 
 labs_n <- pts %>% count(study_ID) %>% mutate(label = paste0(study_ID, " (n=", n, ")"))
@@ -149,8 +136,7 @@ legend_gg <- ggplot(tibble(measure = c("biomass", "cover")),
   geom_point(size = 2, alpha = 0) +   # hide dummy panel points; keys shown via override
   scale_colour_manual(values = colour_vals, name = "Response variable") +
   scale_shape_manual(values = c(biomass = 16, cover = 17), name = "Response variable") +
-  guides(colour = guide_legend(override.aes = list(alpha = 1)),
-         shape  = guide_legend(override.aes = list(alpha = 1))) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
   theme_void() +
   theme(legend.position = "bottom", legend.title = element_text(face = "bold"),
         text = element_text(size = 9, family = "Helvetica"))
@@ -161,14 +147,9 @@ final_plot <- (plot_scatter | plot_forest) / wrap_elements(legend_gg) +
 
 final_plot
 
-# overall slopes (log scale)
 fx
 
-ggsave(here("figures", "Fig2_typemod_canonical.png"),
-       final_plot, width = 200, height = 150, units = "mm", dpi = 300)
+ggsave(here("figures", "Fig2.pdf"), final_plot,
+       width = 200, height = 150, units = "mm", device = cairo_pdf)
 
-# ggsave(
-#   filename = "Fig2.pdf", plot = final_plot,
-#   width = 200, height = 130, units = "mm",
-#   path = here("figures"), device = cairo_pdf
-# )
+

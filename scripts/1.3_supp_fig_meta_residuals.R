@@ -1,5 +1,5 @@
 # Supplementary Fig. 7: meta-analysis residuals (readable precip + study-ID axes)
-suppressMessages({library(tidyverse); library(brms); library(DHARMa); library(patchwork); library(here)})
+
 
 set.seed(321)
 
@@ -57,4 +57,3 @@ p_resid <- p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 +
 
 ggsave(here("figures", "SupplementaryFigure_07_meta_residuals.pdf"),
        p_resid, width = 180, height = 240, units = "mm", device = cairo_pdf)
-message("saved Fig 7")

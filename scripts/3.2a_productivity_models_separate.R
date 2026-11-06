@@ -1,14 +1,10 @@
-# Separate productivity models: biomass and cover fit independently
+# Separate productivity models for biomass and cover
 # ---------------------------------------------------------------------------
-# Sensitivity analysis to the combined type-moderator model (scripts/3.1a):
-# biomass and cover are fit as two separate lognormal models with the same
-# structure and compared side by side (scripts/3.2b_productivity_plot_comparison.R).
-#
-# Structure (identical for both fits; only the response data differ):
-#   productivity ~ removed_propo + (removed_propo | study_ID/block/plot)
-#                                 + (1 | time_length_years),  lognormal()
+# productivity ~ removed_propo + (removed_propo | study_ID/block/plot)
+#                              + (1 | time_length_years), lognormal()
 #
 # Output: model_output/model_biomass_2.rds, model_output/model_cover_2.rds
+# Plot:   scripts/3.2b_productivity_plot_comparison.R
 
 library(tidyverse)
 library(brms)
@@ -21,8 +17,6 @@ seed <- 321
 df_biom  <- read.csv(here("data", "df_biom_brm_2.csv"),  header = TRUE)
 df_cover <- read.csv(here("data", "df_cover_brm_2.csv"), header = TRUE)
 
-# Same exclusion as the pooled model: abundance-only manipulations from ID_29,
-# for which removed_propo (proportion of *species* removed) is not meaningful.
 id29_filter <- function(d) {
   if (!"removal_treatment" %in% names(d)) return(d)
   d %>% filter(!(study_ID == "ID_29" &
@@ -71,7 +65,8 @@ model_cover <- brm(
 )
 model_cover %>% summary()
 
-# 4. The two removal slopes (log scale) ---------------------------------------
+# 4. Removal slopes (log scale) -----------------------------------------------
 
 fixef(model_biomass)["removed_propo", ]
 fixef(model_cover)["removed_propo", ]
+
