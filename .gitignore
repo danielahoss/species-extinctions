@@ -18,3 +18,11 @@ data/
 model_output/
 figures/
 writing/
+
+.claude/
+brms-diagnostics_skill
+round3/
+scripts/round2/
+make_brm_tables.R
+supp_table_meta_models.R
+supp_table_productivity_models.R
